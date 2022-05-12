@@ -1,0 +1,9 @@
+{
+  "src/**/*.+(js|json|ts|tsx)": [
+    "eslint",
+    "npm run test:staged --findRelatedTests  --bail"
+  ],
+  "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+    "prettier --write"
+  ]
+}
