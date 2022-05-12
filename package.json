@@ -12,7 +12,9 @@
   "scripts": {
     "dev": "node src/index.js",
     "test": "jest --watch --maxWorkers=25%",
-    "test:staged": "jest --maxWorkers=50% --passWithNoTests"
+    "test:staged": "jest --maxWorkers=50% --passWithNoTests",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
   },
   "repository": {
     "type": "git",
