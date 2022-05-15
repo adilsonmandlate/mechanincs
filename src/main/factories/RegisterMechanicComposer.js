@@ -1,6 +1,6 @@
-const MechanicRepository = require('../../infrasctruture/repositories/MechanicRepository')
 const RegisterMechanicUseCase = require('../../mechanic/usecases/register-mechanic')
 const RegisterMechanicController = require('../../mechanic/controllers/RegisterMechanicController')
+const MechanicRepository = require('../../mechanic/repositories/MechanicRepository')
 
 class RegisterMechanicComposer {
   static compose() {
