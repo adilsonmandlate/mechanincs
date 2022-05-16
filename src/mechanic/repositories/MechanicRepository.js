@@ -1,7 +1,16 @@
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
+
 class MechanicRepository {
-  async add() {
-    // Add mechanic to database
-    return { name: 'adilson', email: 'adilson@mech.co.mz' }
+  async add(mechanicData) {
+    const mechanic = await prisma.mechanic.create({
+      data: {
+        name: mechanicData.name,
+        email: mechanicData.email
+      }
+    })
+
+    return mechanic
   }
 
   async getById() {
