@@ -1,5 +1,6 @@
 const app = require('./main/config/app')
+const env = require('./main/config/env')
 
-app.listen(3000, () => {
-  console.log('app running on port 3000')
-})
+app.listen(env.port, () =>
+  console.log(`Server app running on port ${env.port}`)
+)
