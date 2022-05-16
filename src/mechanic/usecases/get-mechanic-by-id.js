@@ -4,10 +4,6 @@ class GetMechanicDetailsUseCase {
   }
 
   async handle(mechanicId) {
-    if (!mechanicId) {
-      throw new Error('Mechanic id is missing')
-    }
-
     const mechanic = await this.MechanicRepository.getById(mechanicId)
 
     if (mechanic) {
