@@ -10,7 +10,7 @@
   "description": "Find mechanics available in your area",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "jest --watch --maxWorkers=25%",
     "test:staged": "jest --maxWorkers=50% --passWithNoTests",
     "prepare": "husky install",
@@ -37,8 +37,10 @@
     "husky": "^8.0.1",
     "jest": "^28.1.0",
     "lint-staged": "^12.4.1",
+    "nodemon": "^2.0.16",
     "prettier": "^2.6.2",
-    "prisma": "^3.14.0"
+    "prisma": "^3.14.0",
+    "supertest": "^6.2.3"
   },
   "dependencies": {
     "@prisma/client": "^3.14.0",
@@ -47,5 +49,10 @@
   },
   "prisma": {
     "schema": "src/main/prisma/schema.prisma"
+  },
+  "standard": {
+    "env": [
+      "jest"
+    ]
   }
 }
