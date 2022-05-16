@@ -5,14 +5,19 @@ class RegisterMechanicController {
     this.registerMechanicUseCase = registerMechanicUseCase
   }
 
-  async handle() {
-    // if (!httpRequest.body.name) {
-    //   throw new Error('Name is missing')
-    // }
+  async handle(httpRequest) {
+    if (!httpRequest.body) {
+      return HttpResponse.ServerError()
+    }
 
-    // const mechanicData = { name: httpRequest.body.name }
+    const mechanicData = {
+      name: httpRequest.body.name,
+      email: httpRequest.body.email
+    }
 
-    const registerResponse = await this.registerMechanicUseCase.handle()
+    const registerResponse = await this.registerMechanicUseCase.handle(
+      mechanicData
+    )
     return HttpResponse.ok(registerResponse)
   }
 }
