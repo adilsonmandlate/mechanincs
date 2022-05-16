@@ -1,5 +1,3 @@
-const HttpError = require('./http-error')
-
 class HttpResponse {
   static ok(body) {
     return {
@@ -8,11 +6,11 @@ class HttpResponse {
     }
   }
 
-  static ServerError() {
+  static serverError(statusCode, error = '') {
     return {
-      statusCode: 500,
+      statusCode,
       body: {
-        error: new HttpError('ServerError', 'Internal Error').message
+        error
       }
     }
   }
