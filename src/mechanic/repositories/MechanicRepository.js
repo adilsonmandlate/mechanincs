@@ -13,9 +13,14 @@ class MechanicRepository {
     return mechanic
   }
 
-  async getById() {
-    // Get mechanic from database
-    return
+  async getById(mechanicId) {
+    const mechanic = await prisma.mechanic.findUnique({
+      where: {
+        id: mechanicId
+      }
+    })
+
+    return mechanic
   }
 }
 
