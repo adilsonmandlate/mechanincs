@@ -6,7 +6,7 @@ class RegisterMechanicController {
   }
 
   async handle(httpRequest) {
-    const { id } = httpRequest.params
+    const id = httpRequest?.params?.id
 
     if (!id) {
       return HttpResponse.serverError(400, 'Mechanic id is required')
