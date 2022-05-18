@@ -17,6 +17,10 @@ class RegisterMechanicController {
         Number(id)
       )
 
+      if (registerResponse === null) {
+        return HttpResponse.serverError(404, 'Mechanic not found')
+      }
+
       return HttpResponse.ok(registerResponse)
     } catch (e) {
       return HttpResponse.serverError(500, e)
