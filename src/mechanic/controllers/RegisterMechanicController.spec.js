@@ -3,6 +3,16 @@ const RegisterMechanicController = require('./RegisterMechanicController')
 const makeRegisterMechanic = () => {
   class AddStub {
     async add(mechanicData) {
+      if (mechanicData.email === 'test@mechanic.io') {
+        const error = new Error('Forced new p2002 error')
+        error.code = 'P2002'
+        throw error
+      }
+
+      if (mechanicData.name === 'forceError') {
+        throw new Error('Forced new Error')
+      }
+
       return await Promise.resolve(mechanicData)
     }
   }
@@ -13,7 +23,7 @@ const makeRegisterMechanic = () => {
 const makeRegisterMechanicUseCase = () => {
   class HandleStub {
     async handle(mechanicData) {
-      return await Promise.resolve(mechanicData)
+      return await makeRegisterMechanic().add(mechanicData)
     }
   }
   return new HandleStub()
@@ -76,5 +86,35 @@ describe('Register Mechanic controller', () => {
     })
 
     expect(httpResponse.statusCode).toBe(200)
+  })
+
+  it('should return 409 if email is registered', async () => {
+    const { sut } = makeSut()
+
+    const httpRequest = {
+      body: {
+        name: 'Teste',
+        email: 'test@mechanic.io'
+      }
+    }
+
+    const httpResponse = await sut.handle(httpRequest)
+
+    expect(httpResponse.statusCode).toBe(409)
+  })
+
+  it('should return 500 if email is registered', async () => {
+    const { sut } = makeSut()
+
+    const httpRequest = {
+      body: {
+        name: 'forceError',
+        email: 'user@mechanic.io'
+      }
+    }
+
+    const httpResponse = await sut.handle(httpRequest)
+
+    expect(httpResponse.statusCode).toBe(500)
   })
 })
