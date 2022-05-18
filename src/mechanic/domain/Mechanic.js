@@ -1,8 +1,9 @@
 class Mechanic {
-  constructor(name, age, experience) {
-    this.name = name
-    this.age = age
-    this.experience = experience
+  constructor(data) {
+    this.name = data.name
+    this.email = data.email
+    this.age = data.age
+    this.experience = data.experience
   }
 }
 
