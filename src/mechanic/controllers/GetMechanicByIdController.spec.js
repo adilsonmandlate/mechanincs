@@ -3,6 +3,10 @@ const GetMechanicByIdController = require('./GetMechanicByIdController')
 const makeGetMechanicById = () => {
   class GetById {
     async getById(id) {
+      if (id === 2) {
+        throw new Error('Forced new Error')
+      }
+
       if (id !== 1) {
         return null
       }
@@ -83,5 +87,17 @@ describe('Get Mechanic by Id Controller', () => {
 
     expect(httpResponse.statusCode).toBe(404)
     expect(httpResponse.body).toEqual({ error: 'Mechanic not found' })
+  })
+
+  it('should return 500 if theres any other error', async () => {
+    const { sut } = makeSut()
+    const httpRequest = {
+      params: {
+        id: 2
+      }
+    }
+
+    const httpResponse = await sut.handle(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
   })
 })
