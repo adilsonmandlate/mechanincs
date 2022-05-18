@@ -7,12 +7,20 @@ const makeSut = () => {
 }
 
 describe('Mechanic repository test', () => {
+  beforeAll(() => {
+    prisma.$connect()
+  })
+
   afterEach(async () => {
     await prisma.mechanic.deleteMany({
       where: {
         email: 'user@mechanic.io'
       }
     })
+  })
+
+  afterAll(() => {
+    prisma.$disconnect()
   })
 
   it('should return null if no mechanic is found', async () => {
