@@ -44,6 +44,8 @@ model Professional {
   education  String?
   experience Int      @default(0)
   jobs       Job[]
+  latitude   Float?
+  longitude  Float?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())
 }
@@ -57,6 +59,8 @@ model Job {
   userId         String
   professional   Professional? @relation(fields: [professionalId], references: [id])
   professionalId String?
+  latitude       Float
+  longitude      Float
   resolved       Boolean       @default(false)
   createdAt      DateTime      @default(now())
 }
