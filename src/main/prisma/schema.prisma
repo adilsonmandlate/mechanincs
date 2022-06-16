@@ -25,8 +25,8 @@ model User {
   id          String   @id @default(cuid())
   email       String   @unique
   password    String
-  name        String
-  surname     String
+  firstname   String
+  lastname    String
   phone       BigInt   @unique
   profile_pic String?
   jobs        Job[]
@@ -35,10 +35,10 @@ model User {
 
 model Professional {
   id         String   @id @default(cuid())
-  name       String
-  surname    String
+  firstname  String
+  lastname   String
   email      String   @unique
-  phone      BigInt   @unique
+  phone      String   @unique
   password   String
   profession String?
   education  String?
@@ -47,7 +47,6 @@ model Professional {
   latitude   Float?
   longitude  Float?
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
 }
 
 model Job {

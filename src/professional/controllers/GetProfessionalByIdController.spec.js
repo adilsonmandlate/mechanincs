@@ -1,6 +1,6 @@
-const GetMechanicByIdController = require('./GetMechanicByIdController')
+const GetProfessionalByIdController = require('./GetProfessionalByIdController')
 
-const makeGetMechanicById = () => {
+const makeGetProfessionalById = () => {
   class GetById {
     async getById(id) {
       if (id === 2) {
@@ -21,25 +21,25 @@ const makeGetMechanicById = () => {
   return new GetById()
 }
 
-const makeGetMechanicByIdUseCase = () => {
+const makeGetProfessionalByIdUseCase = () => {
   class HandleStub {
     async handle(id) {
-      return await makeGetMechanicById().getById(id)
+      return await makeGetProfessionalById().getById(id)
     }
   }
   return new HandleStub()
 }
 
 const makeSut = () => {
-  const mechanicRepository = makeGetMechanicById()
-  const getMechanicByIdUseCase = makeGetMechanicByIdUseCase({
-    MechanicRepository: mechanicRepository
+  const professionalRepository = makeGetProfessionalById()
+  const getProfessionalByIdUseCase = makeGetProfessionalByIdUseCase({
+    ProfessionalRepository: professionalRepository
   })
-  const sut = new GetMechanicByIdController({ getMechanicByIdUseCase })
-  return { sut, mechanicRepository, getMechanicByIdUseCase }
+  const sut = new GetProfessionalByIdController({ getProfessionalByIdUseCase })
+  return { sut, professionalRepository, getProfessionalByIdUseCase }
 }
 
-describe('Get Mechanic by Id Controller', () => {
+describe('Get Professional by Id Controller', () => {
   it('should return error 400 if the id is missing from params', async () => {
     const { sut } = makeSut()
 
@@ -52,10 +52,10 @@ describe('Get Mechanic by Id Controller', () => {
     const httpResponse = await sut.handle(httpRequest)
 
     expect(httpResponse.statusCode).toBe(400)
-    expect(httpResponse.body).toEqual({ error: 'Mechanic id is required' })
+    expect(httpResponse.body).toEqual({ error: 'Professional id is required' })
   })
 
-  it('should return given mechanic data if id is provided', async () => {
+  it('should return given professional data if id is provided', async () => {
     const { sut } = makeSut()
 
     const httpRequest = {
@@ -74,7 +74,7 @@ describe('Get Mechanic by Id Controller', () => {
     })
   })
 
-  it("should return 404 if the mechanic doesn't exist", async () => {
+  it("should return 404 if the professional doesn't exist", async () => {
     const { sut } = makeSut()
 
     const httpRequest = {
@@ -86,7 +86,7 @@ describe('Get Mechanic by Id Controller', () => {
     const httpResponse = await sut.handle(httpRequest)
 
     expect(httpResponse.statusCode).toBe(404)
-    expect(httpResponse.body).toEqual({ error: 'Mechanic not found' })
+    expect(httpResponse.body).toEqual({ error: 'Professional not found' })
   })
 
   it('should return 500 if theres any other error', async () => {
