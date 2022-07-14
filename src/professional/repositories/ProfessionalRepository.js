@@ -38,6 +38,23 @@ class ProfessionalRepository {
 
     return professional
   }
+
+  async getByLocation(latitude, longitude, radius = 1000) {
+    const query =
+      await prisma.$queryRaw`SELECT id FROM "Professional" WHERE ST_DWithin(ST_MakePoint(longitude, latitude), ST_MakePoint(${parseFloat(
+        longitude
+      )}, ${parseFloat(latitude)})::geography, ${radius}::int)`
+
+    const professionals = await prisma.professional.findMany({
+      where: {
+        id: {
+          in: query.map(({ id }) => id)
+        }
+      }
+    })
+
+    return professionals
+  }
 }
 
 module.exports = ProfessionalRepository
