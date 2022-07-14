@@ -11,6 +11,7 @@ class GetProfessionalByIdComposer {
     const getProfessionalByIdController = new GetProfessionalByIdController({
       getProfessionalByIdUseCase
     })
+
     return getProfessionalByIdController
   }
 }
