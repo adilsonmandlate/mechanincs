@@ -10,7 +10,9 @@
   "description": "Find mechanics available in your area",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.js",
+    "start": "nodemon src/index.js",
+    "start-twilio": "twilio phone-numbers:update \"+15075854483\" --sms-url=\"http://localhost:3000/api/professionals/confirm-job/message\"",
+    "dev": "concurrently --kill-others \"npm run start\" \"npm run start-twilio\"",
     "test": "jest --watch --maxWorkers=25%",
     "test:staged": "jest --maxWorkers=50% --passWithNoTests",
     "test:coverage": "jest --maxWorkers=25% --coverage",
@@ -33,6 +35,7 @@
   "devDependencies": {
     "@commitlint/cli": "^16.2.4",
     "@commitlint/config-conventional": "^16.2.4",
+    "concurrently": "^7.6.0",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
     "husky": "^8.0.1",
