@@ -1,38 +1,27 @@
-const HttpResponse = require('../../main/helpers/http-response')
+const res = require('../../main/helpers/http-response')
 
-class GetProfessionalByLocation {
-  constructor({ getProfessionalByLocationUseCase }) {
-    this.getProfessionalByLocationUseCase = getProfessionalByLocationUseCase
+const GetProfessionalByLocationController = async (req, repository) => {
+  const { latitude, longitude } = req.params
+
+  if (!latitude || !longitude) {
+    return res.serverError(400, 'Latitude and Longitude are required')
   }
 
-  async handle(httpRequest) {
-    const { latitude, longitude } = httpRequest.params
-
-    if (!latitude || !longitude) {
-      return HttpResponse.serverError(
-        400,
-        'Latitude and Longitude are required'
-      )
-    }
-
-    try {
-      const professionals = await this.getProfessionalByLocationUseCase.handle(
-        latitude,
-        longitude
-      )
-
+  return repository
+    .getByLocation(latitude, longitude)
+    .then((professionals) => {
       if (professionals === null) {
-        return HttpResponse.serverError(
+        return res.serverError(
           404,
           'No professional found with these parameters'
         )
       }
 
-      return HttpResponse.ok(professionals)
-    } catch (e) {
-      return HttpResponse.serverError(500, e)
-    }
-  }
+      return res.ok(professionals)
+    })
+    .catch((err) => {
+      return res.serverError(500, err)
+    })
 }
 
-module.exports = GetProfessionalByLocation
+module.exports = GetProfessionalByLocationController

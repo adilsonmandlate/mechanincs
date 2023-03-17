@@ -1,44 +1,32 @@
-const HttpResponse = require('../../main/helpers/http-response')
+const res = require('../../main/helpers/http-response')
 
-class RegisterProfessionalController {
-  constructor({ registerProfessionalUseCase }) {
-    this.registerProfessionalUseCase = registerProfessionalUseCase
+const RegisterProfessionalController = async (req, repository) => {
+  const { firstname, lastname, email, phone, password } = req.body
+
+  if (!firstname || !lastname || !email) {
+    return res.serverError(400, 'Insert all required data')
   }
 
-  async handle(httpRequest) {
-    if (
-      !httpRequest.body.firstname ||
-      !httpRequest.body.lastname ||
-      !httpRequest.body.email
-    ) {
-      return HttpResponse.serverError(400, 'Insert all required data')
-    }
+  const professionalData = {
+    firstname,
+    lastname,
+    email,
+    phone,
+    password
+  }
 
-    try {
-      const professionalData = {
-        firstname: httpRequest.body.firstname,
-        lastname: httpRequest.body.lastname,
-        email: httpRequest.body.email,
-        phone: httpRequest.body.phone,
-        password: httpRequest.body.password
-      }
-
-      const registerResponse = await this.registerProfessionalUseCase.handle(
-        professionalData
-      )
-
-      return HttpResponse.ok(registerResponse)
-    } catch (e) {
-      if (e.code === 'P2002') {
-        return HttpResponse.serverError(
+  return repository
+    .add(professionalData)
+    .then((professional) => res.ok(professional))
+    .catch((err) => {
+      if (err.code === 'P2002') {
+        return res.serverError(
           409,
           'There is a unique constraint violation, a new user cannot be created with this email and phone'
         )
       }
-
-      return HttpResponse.serverError(500, e)
-    }
-  }
+      return res.serverError(500, err)
+    })
 }
 
 module.exports = RegisterProfessionalController
