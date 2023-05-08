@@ -34,6 +34,14 @@ const getById = async (professionalId) => {
   return professional
 }
 
+const getByPhone = async (phone) => {
+  const professional = await prisma.professional.findUnique({
+    where: { phone: phone.replace('+258', '') }
+  })
+
+  return professional
+}
+
 const getByLocation = async (latitude, longitude, radius = 5000) => {
   const query =
     await prisma.$queryRaw`SELECT id FROM "Professional" WHERE ST_DWithin(ST_MakePoint(longitude, latitude), ST_MakePoint(${parseFloat(
@@ -55,5 +63,6 @@ module.exports = {
   add,
   update,
   getById,
+  getByPhone,
   getByLocation
 }
