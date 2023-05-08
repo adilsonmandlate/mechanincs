@@ -1,6 +1,6 @@
 const res = require('../../main/helpers/http-response')
 
-const RegisterProfessionalController = async (req, repository) => {
+const RegisterProfessionalController = (req, repository) => {
   const { firstname, lastname, email, phone, password } = req.body
 
   if (!firstname || !lastname || !email) {
