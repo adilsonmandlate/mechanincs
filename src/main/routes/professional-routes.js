@@ -13,6 +13,6 @@ module.exports = (router) => {
   )
   router.post('/professionals/new', adapt(RegisterProfessionalComposer))
   router.post('/professionals/update/:id', adapt(RegisterProfessionalComposer))
-  router.post('/professionals/confirm-job', adapt(ConfirmProfessionalComposer))
+  router.post('/professionals/choose', adapt(ConfirmProfessionalComposer))
   router.post('/professionals/confirm-job/message', InboundComposer)
 }
