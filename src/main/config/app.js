@@ -1,9 +1,17 @@
-const express = require('express')
+const http = require('http')
+const app = require('express')()
 const setupApp = require('./setup')
 const setupRoutes = require('./routes')
+const socket = require('../../utils/socketio')
 
-const app = express()
+const server = http.createServer(app)
+
 setupApp(app)
 setupRoutes(app)
 
-module.exports = app
+/**
+ * Register here all socket namespaces
+ */
+socket.init(server).of('/professionals')
+
+module.exports = { server }

@@ -5,9 +5,7 @@ class ExpressRouterAdapter {
         body: req.body,
         params: req.params
       }
-
       const httpResponse = await router(httpRequest)
-
       return res.status(httpResponse.statusCode).json(httpResponse.body)
     }
   }
