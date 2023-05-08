@@ -19,6 +19,12 @@ enum Education {
   PhD
 }
 
+enum JobState {
+  Busy
+  Free
+  Pending
+}
+
 model User {
   id          String   @id @default(cuid())
   email       String   @unique
@@ -44,6 +50,7 @@ model Professional {
   jobs       Job[]
   latitude   Float?
   longitude  Float?
+  state      JobState?
   createdAt  DateTime    @default(now())
 }
 
