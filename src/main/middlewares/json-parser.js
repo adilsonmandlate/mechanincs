@@ -1,3 +1,3 @@
-const bodyParser = require('body-parser')
+const { json } = require('express')
 
-module.exports = bodyParser.urlencoded({ extended: false })
+module.exports = json()
