@@ -1,0 +1,68 @@
+@startuml database diagram
+
+!define TABLE_BORDER_THICKNESS 2
+!define TABLE_HEADER_COLOR LightBlue
+!define TABLE_CONTENT_COLOR White
+
+skinparam class {
+    BorderThickness TABLE_BORDER_THICKNESS
+    HeaderBackgroundColor TABLE_HEADER_COLOR
+    BackgroundColor TABLE_CONTENT_COLOR
+    ArrowColor Black
+}
+
+class User {
+    id: VARCHAR(255) (PK)
+    email: VARCHAR(255)
+    password: VARCHAR(255)
+    firstname: VARCHAR(255)
+    lastname: VARCHAR(255)
+    phone: BIGINT
+    profile_pic: VARCHAR(255)
+    createdAt: DATETIME
+}
+
+class Professional {
+    id: VARCHAR(255) (PK)
+    firstname: VARCHAR(255)
+    lastname: VARCHAR(255)
+    email: VARCHAR(255)
+    phone: VARCHAR(255)
+    password: VARCHAR(255)
+    profession: ENUM('Mechanic')
+    education: ENUM('Primary', 'Secondary', 'University', 'Master', 'PhD')
+    experience: INT
+    latitude: FLOAT
+    longitude: FLOAT
+    state: ENUM('Busy', 'Free', 'Pending')
+    createdAt: DATETIME
+}
+
+class Job {
+    id: VARCHAR(255) (PK)
+    title: VARCHAR(255)
+    description: VARCHAR(255)
+    photo: VARCHAR(255)
+    userId: VARCHAR(255) (FK)
+    professionalId: VARCHAR(255) (FK)
+    latitude: FLOAT
+    longitude: FLOAT
+    resolved: BOOLEAN
+    createdAt: DATETIME
+}
+
+class Review {
+    id: VARCHAR(255) (PK)
+    rating: INT
+    comment: VARCHAR(255)
+    userId: VARCHAR(255) (FK)
+    professionalId: VARCHAR(255) (FK)
+    createdAt: DATETIME
+}
+
+User "1" -- "n" Job
+Professional "1" -- "n" Job
+User "1" -- "n" Review
+Professional "1" -- "n" Review
+
+@enduml

@@ -8,7 +8,7 @@ const ConfirmProfessionalController = (req, repository) => {
   const io = socket.getIO('/professionals').on('connection', (socket) => socket)
 
   if (!professionalId) {
-    return res.serverError(500, 'Professional id is required')
+    return res.serverError(400, 'Professional id is required')
   }
 
   emitter.on('trabalho:aceite', (phone) => {
@@ -38,7 +38,7 @@ const ConfirmProfessionalController = (req, repository) => {
         .create({
           to: `+258${professional.phone}`,
           from: sms.fromNumber,
-          body: `${professional.firstname}, Iara solicita teus serviços. Para aceitar, responda essa mensagem com '1', caso contrario, responda com '0'`
+          body: `${professional.firstname}, alguém solicita teus serviços. Para aceitar, responda essa mensagem com '1', caso contrario, responda com '0'`
         })
         .then(() => {
           return repository.update(professionalId, { state: 'Pending' })
