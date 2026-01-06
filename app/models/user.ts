@@ -53,6 +53,21 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime()
   declare deletedAt?: DateTime
 
+  @column.dateTime()
+  declare emailVerifiedAt?: DateTime
+
+  @column.dateTime()
+  declare msisdnVerifiedAt?: DateTime
+
+  @column()
+  declare emailVerificationToken?: string
+
+  @column()
+  declare passwordResetToken?: string
+
+  @column.dateTime()
+  declare passwordResetExpiresAt?: DateTime
+
   @hasMany(() => UserRole)
   declare roles: HasMany<typeof UserRole>
 
