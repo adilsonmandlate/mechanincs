@@ -37,7 +37,7 @@ router
     // Email/SMS verification
     router.post('/confirm', [AuthController, 'confirmUser'])
   })
-  .prefix('/api/auth')
+  .prefix('/auth')
 
 // Profession routes
 router
@@ -50,7 +50,7 @@ router
     router.patch('/:id/suspend', [ProfessionController, 'suspend'])
     router.delete('/:id', [ProfessionController, 'destroy'])
   })
-  .prefix('/api/professions')
+  .prefix('/professions')
 
 // SOS routes
 router
@@ -72,4 +72,4 @@ router
       })
       .use(middleware.auth())
   })
-  .prefix('/api/sos')
+  .prefix('/sos')

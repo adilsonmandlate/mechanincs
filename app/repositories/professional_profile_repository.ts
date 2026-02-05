@@ -11,8 +11,7 @@ export interface NearbyProfessional {
   isVerified: boolean
   rating: number
   ratingCount: number
-  distance: number
-  distanceFormatted: string
+  distance: string
   profession: string
   status: string
   yearsOfExperience: number
@@ -103,8 +102,6 @@ export class ProfessionalProfileRepository {
       'location'
     )
 
-    console.log('Within radius: ', withinRadiusQuery)
-
     const professionals = await ProfessionalProfile.query()
       .where('status', 'free')
       .where('is_verified', true)
@@ -117,10 +114,8 @@ export class ProfessionalProfileRepository {
       .orderBy('distance_km', 'asc')
       .limit(limit)
 
-    console.log('Professionals: ', professionals)
-
     return professionals.map((profile) => {
-      const distance = (profile as any).distance_km || 0
+      const distance = Number(profile.$extras?.distance_km ?? 0)
 
       return {
         id: profile.id,
@@ -130,8 +125,7 @@ export class ProfessionalProfileRepository {
         isVerified: profile.isVerified,
         rating: profile.ratingAvg,
         ratingCount: profile.ratingCount,
-        distance: Number.parseFloat(distance.toFixed(1)),
-        distanceFormatted: `${Number.parseFloat(distance.toFixed(1))} km away`,
+        distance: `${Number.parseFloat(distance.toFixed(2))} km`,
         profession: profile.profession.name,
         status: profile.status,
         yearsOfExperience: profile.yearsOfExperience,

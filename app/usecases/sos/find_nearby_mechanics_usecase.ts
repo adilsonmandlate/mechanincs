@@ -10,6 +10,12 @@ export default class FindNearbyMechanicsUseCase {
     const radiusKm = data.radius || 10
     const centerPoint = { latitude: data.latitude, longitude: data.longitude }
 
-    return await this.professionalProfileRepository.findNearby(centerPoint, radiusKm, 20)
+    const professionals = await this.professionalProfileRepository.findNearby(
+      centerPoint,
+      radiusKm,
+      20
+    )
+
+    return professionals
   }
 }

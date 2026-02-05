@@ -18,6 +18,7 @@ export default class SosController {
   ) {
     const payload = await request.validateUsing(findNearbyMechanicsValidator)
     const result = await findNearbyMechanicsUseCase.execute({ data: payload })
+
     return response.ok(result)
   }
 
