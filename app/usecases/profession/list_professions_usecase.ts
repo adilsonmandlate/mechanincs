@@ -10,8 +10,8 @@ export default class ListProfessionsUseCase {
 
     return professions.map((profession) => ({
       id: profession.id,
+      code: profession.code,
       name: profession.name,
-      suspended: profession.suspended,
     }))
   }
 }

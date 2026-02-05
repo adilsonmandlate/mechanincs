@@ -11,12 +11,11 @@ import type { RegisterClientDto } from '#dtos/auth/register_client_dto'
 
 @inject()
 export default class RegisterClientUseCase {
-  private emailService = new EmailService()
-  private smsService = new SmsService()
-
   constructor(
     private userRepository: UserRepository,
-    private userRoleRepository: UserRoleRepository
+    private userRoleRepository: UserRoleRepository,
+    private emailService: EmailService,
+    private smsService: SmsService
   ) {}
 
   async execute({ data }: { data: RegisterClientDto }) {
@@ -64,12 +63,6 @@ export default class RegisterClientUseCase {
       await trx.commit()
 
       return {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          msisdn: user.msisdn,
-        },
         message:
           'Registro realizado com sucesso. Verifique seu email e SMS para confirmar sua conta.',
       }

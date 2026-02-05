@@ -16,15 +16,15 @@ export default class LoginUserUseCase {
         throw new BadRequestException('Credenciais inválidas')
       }
 
-      // Check if email is verified (optional - can be made required)
-      // if (!user.emailVerifiedAt) {
-      //   throw new BadRequestException('Por favor, verifique seu email antes de fazer login.')
-      // }
+      if (!user.emailVerifiedAt) {
+        throw new BadRequestException('Por favor, verifique seu email antes de fazer login.')
+      }
 
       // Load user with roles from repository
       const userWithRoles = await this.userRepository.findByIdWithRoles(user.id)
+
       if (!userWithRoles) {
-        throw new BadRequestException('Usuário não encontrado.')
+        throw new BadRequestException('Credenciais inválidas')
       }
 
       const token = await User.accessTokens.create(userWithRoles)

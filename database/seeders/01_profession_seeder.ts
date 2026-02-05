@@ -3,10 +3,12 @@ import Profession from '#models/profession'
 
 export default class extends BaseSeeder {
   async run() {
-    const existing = await Profession.findBy('name', 'Mecanico')
+    const existing = await Profession.findBy('code', 'mecanico')
+
     if (!existing) {
       await Profession.create({
-        name: 'Mecanico',
+        code: 'mecanico',
+        name: 'Mêcanico',
         suspended: false,
       })
     }

@@ -1,15 +1,16 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, beforeSave, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeSave, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import UserRole from '#models/user_role'
 import Job from '#models/job'
 import Rating from '#models/rating'
 import Notification from '#models/notification'
 import ActivityLog from '#models/activity_log'
+import ProfessionalProfile from '#models/professional_profile'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email', 'msisdn'],
@@ -82,6 +83,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => ActivityLog)
   declare activityLogs: HasMany<typeof ActivityLog>
+
+  @hasOne(() => ProfessionalProfile)
+  declare professionalProfile: HasOne<typeof ProfessionalProfile>
 
   @beforeSave()
   static async normalizeName(user: User) {

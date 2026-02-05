@@ -3,7 +3,6 @@ import { ProfessionRepository } from '#repositories/profession_repository'
 import { NotFoundException } from '#exceptions/generic/not_found_exception'
 import { BadRequestException } from '#exceptions/generic/bad_request_exception'
 import type { UpdateProfessionDto } from '#dtos/profession/update_profession_dto'
-import Profession from '#models/profession'
 
 @inject()
 export default class UpdateProfessionUseCase {
@@ -12,13 +11,8 @@ export default class UpdateProfessionUseCase {
   async execute({ id, data }: { id: number; data: UpdateProfessionDto }) {
     const profession = await this.professionRepository.findByIdOrFail(id)
 
-    // If updating name, check if another profession with same name exists
     if (data.name && data.name !== profession.name) {
-      const existing = await Profession.query()
-        .where('name', data.name)
-        .where('id', '!=', id)
-        .whereNull('deleted_at')
-        .first()
+      const existing = await this.professionRepository.findByName(data.name, id)
 
       if (existing) {
         throw new BadRequestException('Uma profissão com este nome já existe.')

@@ -49,8 +49,8 @@ export class UserRepository {
    * @param email - The email to search for.
    * @returns The user object or null if not found.
    */
-  async findByEmail(email: string) {
-    return await User.query().where('email', email).select('id').first()
+  async findByEmail(email: string): Promise<User | null> {
+    return await User.query().where('email', email).first()
   }
 
   /**
@@ -58,8 +58,8 @@ export class UserRepository {
    * @param msisdn - The phone number to search for.
    * @returns The user object or null if not found.
    */
-  async findByMsisdn(msisdn: string) {
-    return await User.query().where('msisdn', msisdn).select('id').first()
+  async findByMsisdn(msisdn: string): Promise<User | null> {
+    return await User.query().where('msisdn', msisdn).first()
   }
 
   /**
@@ -67,8 +67,8 @@ export class UserRepository {
    * @param id - The ID of the user to search for.
    * @returns The user object or null if not found.
    */
-  async findById(id: number, organizationId: number): Promise<User | null> {
-    return await User.query().where('id', id).andWhere('organization_id', organizationId).first()
+  async findById(id: number): Promise<User | null> {
+    return await User.find(id)
   }
 
   /**
@@ -86,14 +86,10 @@ export class UserRepository {
    */
   async update(
     id: number,
-    organizationId: number,
     data: Partial<User>,
     trx?: TransactionClientContract
   ): Promise<User | null> {
-    const user = await User.query()
-      .where('id', id)
-      .andWhere('organization_id', organizationId)
-      .first()
+    const user = await User.find(id)
 
     if (!user) {
       return null
@@ -140,20 +136,14 @@ export class UserRepository {
    * Finds a user by verification token
    */
   async findByVerificationToken(token: string): Promise<User | null> {
-    return await User.query()
-      .where('email_verification_token', token)
-      .whereNotNull('email_verification_token')
-      .first()
+    return await User.query().where('email_verification_token', token).first()
   }
 
   /**
    * Finds a user by password reset token
    */
   async findByResetToken(token: string): Promise<User | null> {
-    return await User.query()
-      .where('password_reset_token', token)
-      .whereNotNull('password_reset_token')
-      .first()
+    return await User.query().where('password_reset_token', token).first()
   }
 
   /**
@@ -176,6 +166,7 @@ export class UserRepository {
     user.password = password
     user.passwordResetToken = undefined
     user.passwordResetExpiresAt = undefined
+
     await user.save()
 
     return user
@@ -201,6 +192,7 @@ export class UserRepository {
 
     user.passwordResetToken = token
     user.passwordResetExpiresAt = expiresAt
+
     await user.save()
 
     return user
@@ -221,6 +213,7 @@ export class UserRepository {
 
     user.emailVerifiedAt = DateTime.now()
     user.emailVerificationToken = undefined
+
     await user.save()
 
     return user

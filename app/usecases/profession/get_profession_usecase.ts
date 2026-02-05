@@ -10,8 +10,8 @@ export default class GetProfessionUseCase {
 
     return {
       id: profession.id,
+      code: profession.code,
       name: profession.name,
-      suspended: profession.suspended,
     }
   }
 }

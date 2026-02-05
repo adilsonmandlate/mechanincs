@@ -14,15 +14,14 @@ import type { RegisterProfessionalDto } from '#dtos/auth/register_professional_d
 
 @inject()
 export default class RegisterProfessionalUseCase {
-  private emailService = new EmailService()
-  private smsService = new SmsService()
-  private locationService = new LocationService()
-
   constructor(
     private userRepository: UserRepository,
     private userRoleRepository: UserRoleRepository,
     private professionRepository: ProfessionRepository,
-    private professionalProfileRepository: ProfessionalProfileRepository
+    private professionalProfileRepository: ProfessionalProfileRepository,
+    private emailService: EmailService,
+    private smsService: SmsService,
+    private locationService: LocationService
   ) {}
 
   async execute({ data }: { data: RegisterProfessionalDto }) {

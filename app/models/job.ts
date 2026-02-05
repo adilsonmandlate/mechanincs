@@ -34,6 +34,12 @@ export default class Job extends BaseModel {
   @column()
   declare resolved: boolean
 
+  @column.dateTime()
+  declare smsSentAt?: DateTime
+
+  @column.dateTime()
+  declare confirmedAt?: DateTime
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

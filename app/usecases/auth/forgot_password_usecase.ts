@@ -8,10 +8,11 @@ import type { ForgotPasswordDto } from '#dtos/auth/forgot_password_dto'
 
 @inject()
 export default class ForgotPasswordUseCase {
-  private emailService = new EmailService()
-  private smsService = new SmsService()
-
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private emailService: EmailService,
+    private smsService: SmsService
+  ) {}
 
   async execute(data: ForgotPasswordDto) {
     // Find user by email or msisdn
@@ -45,4 +46,3 @@ export default class ForgotPasswordUseCase {
     }
   }
 }
-

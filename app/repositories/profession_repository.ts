@@ -12,6 +12,19 @@ export class ProfessionRepository {
   }
 
   /**
+   * Finds a profession by name
+   */
+  async findByName(name: string, excludeId?: number): Promise<Profession | null> {
+    const query = Profession.query().where('name', name).whereNull('deleted_at')
+
+    if (excludeId) {
+      query.where('id', '!=', excludeId)
+    }
+
+    return await query.first()
+  }
+
+  /**
    * Finds a profession by ID or throws if not found
    */
   async findByIdOrFail(id: number): Promise<Profession> {

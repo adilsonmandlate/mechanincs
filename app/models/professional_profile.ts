@@ -1,8 +1,9 @@
 import Profession from '#models/profession'
 import ProfessionalStat from '#models/professional_stat'
 import User from '#models/user'
-import { BaseModel, column, belongsTo, hasOne } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
+import Expertise from '#models/expertise'
+import { BaseModel, column, belongsTo, hasOne, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 
 export default class ProfessionalProfile extends BaseModel {
@@ -36,6 +37,9 @@ export default class ProfessionalProfile extends BaseModel {
   @column()
   declare location: string
 
+  @column()
+  declare isVerified: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
@@ -53,4 +57,10 @@ export default class ProfessionalProfile extends BaseModel {
 
   @hasOne(() => ProfessionalStat)
   declare stats: HasOne<typeof ProfessionalStat>
+
+  @manyToMany(() => Expertise, {
+    pivotTable: 'professional_expertises',
+    pivotForeignKey: 'professional_id',
+  })
+  declare expertises: ManyToMany<typeof Expertise>
 }

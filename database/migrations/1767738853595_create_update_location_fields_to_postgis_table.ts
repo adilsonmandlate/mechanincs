@@ -10,7 +10,11 @@ export default class extends BaseSchema {
 
       await db.rawQuery(`
         ALTER TABLE professional_profiles 
-        DROP COLUMN IF EXISTS location,
+        DROP COLUMN IF EXISTS location
+      `)
+
+      await db.rawQuery(`
+        ALTER TABLE professional_profiles 
         RENAME COLUMN location_new TO location
       `)
 
@@ -21,7 +25,11 @@ export default class extends BaseSchema {
 
       await db.rawQuery(`
         ALTER TABLE jobs 
-        DROP COLUMN IF EXISTS location,
+        DROP COLUMN IF EXISTS location
+      `)
+
+      await db.rawQuery(`
+        ALTER TABLE jobs 
         RENAME COLUMN location_new TO location
       `)
     })
@@ -31,13 +39,21 @@ export default class extends BaseSchema {
     this.defer(async (db) => {
       await db.rawQuery(`
         ALTER TABLE professional_profiles 
-        DROP COLUMN IF EXISTS location,
+        DROP COLUMN IF EXISTS location
+      `)
+
+      await db.rawQuery(`
+        ALTER TABLE professional_profiles 
         ADD COLUMN location VARCHAR(255) NOT NULL DEFAULT ''
       `)
 
       await db.rawQuery(`
         ALTER TABLE jobs 
-        DROP COLUMN IF EXISTS location,
+        DROP COLUMN IF EXISTS location
+      `)
+
+      await db.rawQuery(`
+        ALTER TABLE jobs 
         ADD COLUMN location VARCHAR(255) NOT NULL DEFAULT ''
       `)
     })
