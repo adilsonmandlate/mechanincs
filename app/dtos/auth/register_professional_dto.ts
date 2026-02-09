@@ -1,6 +1,5 @@
 export interface RegisterProfessionalDto {
   name: string
-  email: string
   msisdn: string
   password: string
   gender: 'male' | 'female'

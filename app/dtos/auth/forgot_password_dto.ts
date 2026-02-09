@@ -1,4 +1,4 @@
 export interface ForgotPasswordDto {
-  identifier: string
+  msisdn: string
 }
 

@@ -59,7 +59,7 @@ export default class GetSosRequestUseCase {
           msisdn: professional.msisdn,
           phoneFormatted: professional.msisdn, // TODO: formatar telefone
           isVerified: professionalProfile.isVerified,
-          rating: Number.parseFloat(professionalProfile.ratingAvg.toFixed(1)),
+          rating: professionalProfile.ratingAvg,
           ratingCount: professionalProfile.ratingCount,
           profession: professionalProfile.profession?.name || 'Mecânico',
           yearsOfExperience: professionalProfile.yearsOfExperience,

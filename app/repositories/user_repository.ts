@@ -133,10 +133,15 @@ export class UserRepository {
   }
 
   /**
-   * Finds a user by verification token
+   * Finds a user by verification token (full token or 6-char code sent by SMS)
    */
   async findByVerificationToken(token: string): Promise<User | null> {
-    return await User.query().where('email_verification_token', token).first()
+    const byExact = await User.query().where('email_verification_token', token).first()
+    if (byExact) return byExact
+    return await User.query()
+      .whereNotNull('email_verification_token')
+      .whereRaw('email_verification_token LIKE ?', [`${token}%`])
+      .first()
   }
 
   /**
@@ -212,6 +217,27 @@ export class UserRepository {
     }
 
     user.emailVerifiedAt = DateTime.now()
+    user.emailVerificationToken = undefined
+
+    await user.save()
+
+    return user
+  }
+
+  /**
+   * Verifies user MSISDN (SMS verification)
+   */
+  async verifyMsisdn(id: number, trx?: TransactionClientContract): Promise<User | null> {
+    const user = await User.find(id)
+    if (!user) {
+      return null
+    }
+
+    if (trx) {
+      user.useTransaction(trx)
+    }
+
+    user.msisdnVerifiedAt = DateTime.now()
     user.emailVerificationToken = undefined
 
     await user.save()

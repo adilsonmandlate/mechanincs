@@ -1,5 +1,5 @@
 export interface LoginDto {
-  identifier: string
+  msisdn: string
   password: string
 }
 

@@ -3,7 +3,6 @@ import { UserRepository } from '#repositories/user_repository'
 import { UserRoleRepository } from '#repositories/user_role_repository'
 import { ProfessionRepository } from '#repositories/profession_repository'
 import { ProfessionalProfileRepository } from '#repositories/professional_profile_repository'
-import { EmailService } from '#services/email_service'
 import { SmsService } from '#services/sms_service'
 import { LocationService } from '#services/location_service'
 import db from '@adonisjs/lucid/services/db'
@@ -19,7 +18,6 @@ export default class RegisterProfessionalUseCase {
     private userRoleRepository: UserRoleRepository,
     private professionRepository: ProfessionRepository,
     private professionalProfileRepository: ProfessionalProfileRepository,
-    private emailService: EmailService,
     private smsService: SmsService,
     private locationService: LocationService
   ) {}
@@ -28,41 +26,28 @@ export default class RegisterProfessionalUseCase {
     const trx = await db.transaction()
 
     try {
-      // Check if email exists
-      const emailExists = await this.userRepository.findByEmail(data.email)
-      if (emailExists) {
-        throw new BadRequestException('O email já está em uso.')
-      }
-
-      // Check if msisdn exists
       const msisdnExists = await this.userRepository.findByMsisdn(data.msisdn)
       if (msisdnExists) {
         throw new BadRequestException('O número de celular já está em uso.')
       }
 
-      // Verify profession exists
       await this.professionRepository.findByIdOrFail(data.professionId)
 
-      // Generate verification token
-      const emailVerificationToken = randomBytes(32).toString('hex')
+      const verificationToken = randomBytes(32).toString('hex')
 
-      // Extract professional-specific data
       const { professionId, education, yearsOfExperience, about, location, ...userData } = data
 
-      // Convert location object to PostGIS POINT string
       const locationPoint = this.locationService.toPostGISPoint(location)
 
-      // Create user
       const user = await this.userRepository.create(
         {
           ...userData,
           birthdate: userData.birthdate ? DateTime.fromJSDate(userData.birthdate) : undefined,
-          emailVerificationToken,
+          emailVerificationToken: verificationToken,
         },
         trx
       )
 
-      // Create professional role
       await this.userRoleRepository.create(
         {
           userId: user.id,
@@ -71,7 +56,6 @@ export default class RegisterProfessionalUseCase {
         trx
       )
 
-      // Create professional profile
       await this.professionalProfileRepository.create(
         {
           userId: user.id,
@@ -80,16 +64,14 @@ export default class RegisterProfessionalUseCase {
           yearsOfExperience,
           about: about || null,
           location: locationPoint,
-          status: 'pending', // Needs verification before being active
+          status: 'pending',
           ratingAvg: 0,
           ratingCount: 0,
         },
         trx
       )
 
-      // Send verification emails/SMS
-      await this.emailService.sendVerificationEmail(data.email, emailVerificationToken, data.name)
-      await this.smsService.sendVerificationSms(data.msisdn, emailVerificationToken.substring(0, 6))
+      await this.smsService.sendVerificationSms(data.msisdn, verificationToken.substring(0, 6))
 
       await trx.commit()
 
@@ -97,11 +79,10 @@ export default class RegisterProfessionalUseCase {
         user: {
           id: user.id,
           name: user.name,
-          email: user.email,
           msisdn: user.msisdn,
         },
         message:
-          'Registro realizado com sucesso. Verifique seu email e SMS para confirmar sua conta.',
+          'Registro realizado com sucesso. Verifique seu número por SMS para confirmar sua conta.',
       }
     } catch (error) {
       await trx.rollback()

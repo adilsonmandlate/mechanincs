@@ -15,7 +15,7 @@ Este documento descreve a API do backend **Mechanics** para uso na construção 
 
 ## 2. Respostas de erro
 
-- **400 Bad Request** – Regra de negócio (ex.: email em uso, mecânico ocupado).
+- **400 Bad Request** – Regra de negócio (ex.: msisdn em uso, mecânico ocupado).
 - **401 Unauthorized** – Não autenticado ou token inválido/expirado.
 - **403 Forbidden** – Autenticado mas sem permissão (ex.: só profissional pode confirmar).
 - **404 Not Found** – Recurso não encontrado.
@@ -66,7 +66,6 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 ```json
 {
   "name": "string (3-255)",
-  "email": "string (email)",
   "msisdn": "string (E.164, ex: +258841234567)",
   "password": "string (mín. 8)",
   "gender": "male" | "female",
@@ -78,11 +77,11 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "message": "Registro realizado com sucesso. Verifique seu email e SMS para confirmar sua conta."
+  "message": "Registro realizado com sucesso. Verifique seu número por SMS para confirmar sua conta."
 }
 ```
 
-**Erros:** 400 se email ou msisdn já em uso.
+**Erros:** 400 se msisdn já em uso.
 
 ---
 
@@ -97,7 +96,6 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 ```json
 {
   "name": "string (3-255)",
-  "email": "string (email)",
   "msisdn": "string (E.164)",
   "password": "string (mín. 8)",
   "gender": "male" | "female",
@@ -120,14 +118,13 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
   "user": {
     "id": "number",
     "name": "string",
-    "email": "string",
     "msisdn": "string"
   },
-  "message": "Registro realizado com sucesso. Verifique seu email e SMS para confirmar sua conta."
+  "message": "Registro realizado com sucesso. Verifique seu número por SMS para confirmar sua conta."
 }
 ```
 
-**Erros:** 400 email/msisdn em uso; 404 profissão não encontrada.
+**Erros:** 400 msisdn em uso; 404 profissão não encontrada.
 
 ---
 
@@ -141,7 +138,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "identifier": "string (email ou msisdn)",
+  "msisdn": "string (E.164, ex: +258841234567)",
   "password": "string"
 }
 ```
@@ -154,16 +151,14 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
   "user": {
     "id": "number",
     "name": "string",
-    "email": "string",
     "msisdn": "string",
-    "emailVerified": "boolean",
     "msisdnVerified": "boolean",
     "roles": ["client"] | ["professional"] | ["client", "professional"]
   }
 }
 ```
 
-**Erros:** 400 credenciais inválidas ou email não verificado.
+**Erros:** 400 credenciais inválidas ou número não verificado.
 
 ---
 
@@ -177,7 +172,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "identifier": "string (email ou msisdn)"
+  "msisdn": "string (E.164)"
 }
 ```
 
@@ -185,7 +180,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "message": "Se o email/número existir, você receberá instruções para redefinir sua senha."
+  "message": "Se o número existir, você receberá um SMS com instruções para redefinir sua senha."
 }
 ```
 
@@ -201,7 +196,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "token": "string (token recebido por email/SMS)",
+  "token": "string (token recebido por SMS)",
   "password": "string (mín. 8)"
 }
 ```
@@ -218,7 +213,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ---
 
-#### 3.2.6 Confirmar conta (email/SMS)
+#### 3.2.6 Confirmar conta (SMS)
 
 | Método | Rota             | Auth |
 |--------|------------------|------|
@@ -228,7 +223,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "token": "string (token de verificação)"
+  "token": "string (código recebido por SMS)"
 }
 ```
 
@@ -236,11 +231,11 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ```json
 {
-  "message": "Email verificado com sucesso!"
+  "message": "Conta verificada com sucesso!"
 }
 ```
 
-**Erros:** 400 token inválido ou email já verificado.
+**Erros:** 400 token inválido ou conta já verificada.
 
 ---
 
@@ -600,8 +595,8 @@ Recebe resposta do profissional por SMS (1 = aceitar, 2 = recusar). Body depende
 
 ### 4.1 Registro e login
 
-1. **Cliente:** POST `/auth/register/client` → usuário deve confirmar email/SMS → POST `/auth/confirm` com token → POST `/auth/login` com `identifier` + `password` → guardar `token` e `user`.
-2. **Profissional:** GET `/professions` para listar profissões → POST `/auth/register/professional` (com `professionId` e `location`) → confirmar conta → login → guardar token e user.
+1. **Cliente:** POST `/auth/register/client` (apenas msisdn, sem email) → usuário recebe código por SMS → POST `/auth/confirm` com o código recebido → POST `/auth/login` com `msisdn` + `password` → guardar `token` e `user`.
+2. **Profissional:** GET `/professions` para listar profissões → POST `/auth/register/professional` (apenas msisdn, com `professionId` e `location`) → confirmar conta por SMS (POST `/auth/confirm`) → login com `msisdn` + `password` → guardar token e user.
 
 ### 4.2 Fluxo SOS (cliente)
 
@@ -655,11 +650,11 @@ Construa o frontend da aplicação Mechanics usando a API REST documentada em do
 
 Requisitos gerais:
 - Base URL da API: [definir, ex: http://localhost:3333]. Não há prefixo /api.
-- Autenticação: Bearer token no header Authorization. Token obtido em POST /auth/login (identifier + password). Persistir token e user (ex.: localStorage/sessionStorage ou estado global). Em 401, redirecionar para login.
+- Autenticação: Bearer token no header Authorization. Token obtido em POST /auth/login (msisdn + password). Persistir token e user (ex.: localStorage/sessionStorage ou estado global). Em 401, redirecionar para login.
 - Todas as requisições e respostas são JSON. Tratar erros 400, 401, 403, 404, 422 e 500 conforme formato da especificação (message, code quando existir).
 
 Escopo do frontend (ajustar conforme necessidade):
-1. Telas de autenticação: registro (cliente e profissional), login, esqueci senha, redefinir senha, confirmar conta (com token na URL ou input).
+1. Telas de autenticação: registro (cliente e profissional) apenas com msisdn, login com msisdn e senha, esqueci senha (msisdn), redefinir senha, confirmar conta com código recebido por SMS.
 2. Para clientes: listar mecânicos próximos (GET /sos/nearby com latitude, longitude, radius opcional), criar pedido SOS (POST /sos/request com professionalId, problemDescription, location), ver detalhe do pedido (GET /sos/request/:id) com polling até status confirmed ou canceled, cancelar pedido (POST /sos/request/:id/cancel). professionalId é o id do item retornado em /sos/nearby.
 3. Para profissionais: confirmar pedido (POST /sos/request/:id/confirm) e recusar (POST /sos/request/:id/reject). Assumir que o profissional recebe o requestId por outro meio (notificação, lista de pedidos, etc.) até que exista endpoint de listagem no backend.
 4. Profissões: listar (GET /professions) e, no registro de profissional, listar expertises (GET /professions/:id/expertises) se necessário para UI.

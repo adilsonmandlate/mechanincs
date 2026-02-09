@@ -43,10 +43,10 @@ export default class Job extends BaseModel {
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
-  @belongsTo(() => User, { foreignKey: 'user_id' })
+  @belongsTo(() => User, { foreignKey: 'userId' })
   declare client: BelongsTo<typeof User>
 
-  @belongsTo(() => User, { foreignKey: 'professional_id' })
+  @belongsTo(() => User, { foreignKey: 'professionalId' })
   declare professional: BelongsTo<typeof User>
 
   @hasMany(() => JobEvent)

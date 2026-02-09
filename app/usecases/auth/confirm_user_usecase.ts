@@ -11,17 +11,17 @@ export default class ConfirmUserUseCase {
     const user = await this.userRepository.findByVerificationToken(data.token)
 
     if (!user) {
-      throw new BadRequestException('Token de verificação inválido.')
+      throw new BadRequestException('Código de verificação inválido.')
     }
 
-    if (user.emailVerifiedAt) {
-      throw new BadRequestException('Email já foi verificado.')
+    if (user.msisdnVerifiedAt) {
+      throw new BadRequestException('Conta já verificada.')
     }
 
-    await this.userRepository.verifyEmail(user.id)
+    await this.userRepository.verifyMsisdn(user.id)
 
     return {
-      message: 'Email verificado com sucesso!',
+      message: 'Conta verificada com sucesso!',
     }
   }
 }

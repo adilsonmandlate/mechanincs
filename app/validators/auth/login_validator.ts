@@ -2,7 +2,7 @@ import vine from '@vinejs/vine'
 
 export const loginValidator = vine.compile(
   vine.object({
-    identifier: vine.string(), // Can be email or msisdn
+    msisdn: vine.string().regex(/^\+?[1-9]\d{1,14}$/),
     password: vine.string(),
   })
 )

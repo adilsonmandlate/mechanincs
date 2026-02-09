@@ -28,7 +28,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare normalizedName: string
 
   @column()
-  declare email: string
+  declare email: string | null
 
   @column()
   declare msisdn: string
@@ -100,7 +100,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @beforeSave()
   static async normalizeEmail(user: User) {
-    if (user.$dirty.email) {
+    if (user.$dirty.email && user.email) {
       user.email = user.email.toLowerCase().trim()
     }
   }
