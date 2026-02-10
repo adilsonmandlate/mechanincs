@@ -17,7 +17,8 @@ export default class ForgotPasswordUseCase {
 
     if (!user) {
       return {
-        message: 'Se o número existir, você receberá um SMS com instruções para redefinir sua senha.',
+        message:
+          'Se o número existir, você receberá um SMS com instruções para redefinir sua senha.',
       }
     }
 

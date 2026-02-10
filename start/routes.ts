@@ -65,10 +65,12 @@ router
     router
       .group(() => {
         router.post('/request', [SosController, 'create'])
+        router.get('/request/active', [SosController, 'getActive'])
         router.get('/request/:id', [SosController, 'get'])
         router.post('/request/:id/confirm', [SosController, 'confirm'])
         router.post('/request/:id/reject', [SosController, 'reject'])
         router.post('/request/:id/cancel', [SosController, 'cancel'])
+        router.post('/request/:id/rate', [SosController, 'rate'])
       })
       .use(middleware.auth())
   })

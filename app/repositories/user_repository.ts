@@ -54,9 +54,7 @@ export class UserRepository {
   }
 
   /**
-   * Finds a user by their phone number.
-   * @param msisdn - The phone number to search for.
-   * @returns The user object or null if not found.
+   * Finds a user by their phone number
    */
   async findByMsisdn(msisdn: string): Promise<User | null> {
     return await User.query().where('msisdn', msisdn).first()

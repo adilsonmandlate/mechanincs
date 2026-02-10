@@ -42,8 +42,18 @@ export class SmsService {
   /**
    * Send SOS request SMS to professional
    */
-  async sendSosRequestSms(msisdn: string, clientName: string): Promise<void> {
-    const message = `Olá, foram requisitados seus serviços por ${clientName}. Para aceitar este trabalho, responda essa SMS com 1. Para recusar responda com 2.`
+  async sendSosRequestSms(
+    msisdn: string,
+    clientName: string,
+    problemDescription: string,
+    requestId: number
+  ): Promise<void> {
+    const message =
+      `Olá, foram requisitados seus serviços por ${clientName}}\n` +
+      `Problema: ${problemDescription}\n\n` +
+      `Responda com:\n` +
+      `1 ${requestId} = aceitar\n` +
+      `2 ${requestId} = recusar`
 
     logger.info(`[SmsService] SOS request SMS would be sent to ${msisdn}`)
     logger.info(`[SmsService] Message: ${message}`)
@@ -54,5 +64,31 @@ export class SmsService {
     //   from: process.env.TWILIO_PHONE_NUMBER,
     //   body: message
     // })
+  }
+
+  /**
+   * Send SOS mechanic help/commands SMS
+   */
+  async sendSosAcceptedSms(msisdn: string, requestId: number): Promise<void> {
+    const message =
+      `Você aceitou o SOS #${requestId}.\n` + `Quando começar o trabalho, responda: 3 ${requestId}`
+
+    logger.info(`[SmsService] SOS accepted SMS would be sent to ${msisdn}`)
+    logger.info(`[SmsService] Message: ${message}`)
+  }
+
+  async sendSosStartedSms(msisdn: string, requestId: number): Promise<void> {
+    const message =
+      `Trabalho iniciado no SOS #${requestId}.\n` + `Quando terminar, responda: 4 ${requestId}`
+
+    logger.info(`[SmsService] SOS started SMS would be sent to ${msisdn}`)
+    logger.info(`[SmsService] Message: ${message}`)
+  }
+
+  async sendSosCompletedSms(msisdn: string, requestId: number): Promise<void> {
+    const message = `SOS #${requestId} concluído. Obrigado.`
+
+    logger.info(`[SmsService] SOS completed SMS would be sent to ${msisdn}`)
+    logger.info(`[SmsService] Message: ${message}`)
   }
 }

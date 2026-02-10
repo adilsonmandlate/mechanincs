@@ -6,4 +6,3 @@ export const resetPasswordValidator = vine.compile(
     password: vine.string().minLength(8),
   })
 )
-

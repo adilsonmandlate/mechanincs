@@ -21,33 +21,44 @@ export default class GetSosRequestUseCase {
     const professional = job.professional
     const professionalProfile = professional?.professionalProfile || null
 
-    // Calculate distance if professional profile exists
     let distance = 0
-    let distanceFormatted = '0 km away'
-    if (job.location && professionalProfile?.location) {
+    let distanceFormatted = '0 km'
+    if (professionalProfile) {
       distance = await this.jobRepository.calculateDistanceToProfessional(
         job.id,
-        professionalProfile.location
+        professionalProfile.id
       )
-      distanceFormatted = `${Number.parseFloat(distance.toFixed(1))} km away`
+      distanceFormatted = `${Number.parseFloat(distance.toFixed(2))} km`
     }
 
     // Determine status
     let status = 'notifying'
-    let message = 'We are notifying the mechanic via SMS. Please stay close to your phone.'
+    let message =
+      'Estamos notificando o mecânico via SMS. Por favor, mantenha-se perto do seu telefone.'
 
     if (job.smsSentAt && !job.confirmedAt) {
       status = 'notified'
-      message = 'SMS sent to mechanic. Waiting for confirmation...'
+      message = 'SMS enviado para o mecânico. Aguardando confirmação...'
     } else if (job.confirmedAt && job.status === 'accepted') {
       status = 'confirmed'
-      message = 'Mechanic confirmed! You can now call them.'
+      message = 'Mecânico confirmou o pedido. Agora você pode ligar para ele.'
+    } else if (job.status === 'started') {
+      status = 'in_progress'
+      message = 'Mecânico iniciou o trabalho. Aguarde a conclusão.'
+    } else if (job.status === 'completed') {
+      status = 'completed'
+      message = 'Trabalho concluído. Em breve você poderá avaliar o mecânico.'
     } else if (job.status === 'canceled') {
       status = 'canceled'
-      message = 'Request canceled.'
+      message = 'Pedido cancelado.'
     }
 
-    if (status === 'confirmed' && professional && professionalProfile) {
+    const hasFullProfessional =
+      (status === 'confirmed' || status === 'in_progress' || status === 'completed') &&
+      professional &&
+      professionalProfile
+
+    if (hasFullProfessional) {
       return {
         requestId: job.id,
         status,
@@ -57,7 +68,7 @@ export default class GetSosRequestUseCase {
           name: professional.name,
           profilePhoto: professional.profilePhoto || null,
           msisdn: professional.msisdn,
-          phoneFormatted: professional.msisdn, // TODO: formatar telefone
+          phoneFormatted: professional.msisdn,
           isVerified: professionalProfile.isVerified,
           rating: professionalProfile.ratingAvg,
           ratingCount: professionalProfile.ratingCount,
@@ -65,7 +76,7 @@ export default class GetSosRequestUseCase {
           yearsOfExperience: professionalProfile.yearsOfExperience,
           about: professionalProfile.about,
           location: professionalProfile.location,
-          distance,
+          distance: distanceFormatted,
           distanceFormatted,
           responseRate: 95, // TODO: calcular
           acceptanceRate: 92, // TODO: calcular

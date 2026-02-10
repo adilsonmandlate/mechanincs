@@ -35,7 +35,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
 
     logger.error(error)
     return response.status(500).json({
-      message: 'Internal server error',
+      message: 'Erro interno do servidor',
       ...(this.debug && { code: 'E_INTERNAL_SERVER_ERROR' }),
       ...(this.debug && { error: error.message }),
     })

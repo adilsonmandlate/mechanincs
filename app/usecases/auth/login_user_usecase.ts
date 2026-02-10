@@ -17,7 +17,9 @@ export default class LoginUserUseCase {
       }
 
       if (!user.msisdnVerifiedAt) {
-        throw new BadRequestException('Por favor, verifique seu número por SMS antes de fazer login.')
+        throw new BadRequestException(
+          'Por favor, verifique seu número por SMS antes de fazer login.'
+        )
       }
 
       const userWithRoles = await this.userRepository.findByIdWithRoles(user.id)

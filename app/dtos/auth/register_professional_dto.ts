@@ -10,4 +10,3 @@ export interface RegisterProfessionalDto {
   about?: string
   location: { latitude: number; longitude: number }
 }
-

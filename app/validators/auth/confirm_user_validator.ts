@@ -5,4 +5,3 @@ export const confirmUserValidator = vine.compile(
     token: vine.string(),
   })
 )
-

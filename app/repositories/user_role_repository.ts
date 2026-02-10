@@ -23,12 +23,8 @@ export class UserRoleRepository {
    * Checks if user has a specific role
    */
   async hasRole(userId: number, role: 'client' | 'professional' | 'admin'): Promise<boolean> {
-    const userRole = await UserRole.query()
-      .where('user_id', userId)
-      .where('role', role)
-      .first()
+    const userRole = await UserRole.query().where('user_id', userId).where('role', role).first()
 
     return !!userRole
   }
 }
-

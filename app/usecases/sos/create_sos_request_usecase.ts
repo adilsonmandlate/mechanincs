@@ -47,7 +47,7 @@ export default class CreateSosRequestUseCase {
     const job = await this.jobRepository.create({
       userId,
       professionalId: professionalUser.id,
-      title: 'SOS Request',
+      title: 'Pedido SOS',
       description: data.problemDescription,
       photo: null,
       location: locationPoint,
@@ -68,7 +68,12 @@ export default class CreateSosRequestUseCase {
 
     // Send SMS to professional
     if (professionalUser.msisdn) {
-      await this.smsService.sendSosRequestSms(professionalUser.msisdn, clientName)
+      await this.smsService.sendSosRequestSms(
+        professionalUser.msisdn,
+        clientName,
+        data.problemDescription,
+        job.id
+      )
     }
 
     // Update SMS sent timestamp
@@ -81,7 +86,7 @@ export default class CreateSosRequestUseCase {
         id: professional.id,
         name: professionalUser.name || 'Mecânico',
       },
-      message: `We are notifying Mechanic ${professionalUser.name || 'the mechanic'} via SMS. Please stay close to your phone.`,
+      message: `Estamos notificando o mecânico ${professionalUser.name.split(' ')[0] || ''} via SMS. Por favor, mantenha-se perto do seu telefone.`,
       createdAt: job.createdAt,
     }
   }

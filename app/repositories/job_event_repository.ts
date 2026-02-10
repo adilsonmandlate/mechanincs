@@ -8,7 +8,7 @@ export class JobEventRepository {
   async create(
     data: {
       jobId: number
-      eventType: 'created' | 'accepted' | 'canceled'
+      eventType: 'created' | 'accepted' | 'started' | 'completed' | 'canceled'
       userId: number
       metadata?: Record<string, any>
     },

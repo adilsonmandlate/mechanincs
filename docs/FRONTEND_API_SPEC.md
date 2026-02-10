@@ -39,9 +39,9 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 ### 3.1 Health check
 
-| Método | Rota   | Auth | Descrição      |
-|--------|--------|------|----------------|
-| GET    | `/`    | Não  | Health check   |
+| Método | Rota | Auth | Descrição    |
+| ------ | ---- | ---- | ------------ |
+| GET    | `/`  | Não  | Health check |
 
 **Response 200:**
 
@@ -58,7 +58,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 #### 3.2.1 Registrar cliente
 
 | Método | Rota                    | Auth |
-|--------|-------------------------|------|
+| ------ | ----------------------- | ---- |
 | POST   | `/auth/register/client` | Não  |
 
 **Body:**
@@ -66,7 +66,7 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 ```json
 {
   "name": "string (3-255)",
-  "msisdn": "string (E.164, ex: +258841234567)",
+  "msisdn": "string (Moçambique: 9 dígitos, ex: 841234567, sem +258)",
   "password": "string (mín. 8)",
   "gender": "male" | "female",
   "birthdate": "string (ISO date, opcional)"
@@ -87,16 +87,16 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 #### 3.2.2 Registrar profissional
 
-| Método | Rota                         | Auth |
-|--------|------------------------------|------|
-| POST   | `/auth/register/professional`| Não  |
+| Método | Rota                          | Auth |
+| ------ | ----------------------------- | ---- |
+| POST   | `/auth/register/professional` | Não  |
 
 **Body:**
 
 ```json
 {
   "name": "string (3-255)",
-  "msisdn": "string (E.164)",
+  "msisdn": "string (9 dígitos, ex: 841234567)",
   "password": "string (mín. 8)",
   "gender": "male" | "female",
   "birthdate": "string (ISO date, opcional)",
@@ -130,15 +130,15 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 #### 3.2.3 Login
 
-| Método | Rota           | Auth |
-|--------|----------------|------|
-| POST   | `/auth/login`  | Não  |
+| Método | Rota          | Auth |
+| ------ | ------------- | ---- |
+| POST   | `/auth/login` | Não  |
 
 **Body:**
 
 ```json
 {
-  "msisdn": "string (E.164, ex: +258841234567)",
+  "msisdn": "string (Moçambique: 9 dígitos, ex: 841234567, sem +258)",
   "password": "string"
 }
 ```
@@ -164,15 +164,15 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 #### 3.2.4 Esqueci a senha
 
-| Método | Rota                   | Auth |
-|--------|------------------------|------|
-| POST   | `/auth/forgot-password`| Não  |
+| Método | Rota                    | Auth |
+| ------ | ----------------------- | ---- |
+| POST   | `/auth/forgot-password` | Não  |
 
 **Body:**
 
 ```json
 {
-  "msisdn": "string (E.164)"
+  "msisdn": "string (9 dígitos, ex: 841234567)"
 }
 ```
 
@@ -188,9 +188,9 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 #### 3.2.5 Redefinir senha
 
-| Método | Rota                  | Auth |
-|--------|-----------------------|------|
-| POST   | `/auth/reset-password`| Não  |
+| Método | Rota                   | Auth |
+| ------ | ---------------------- | ---- |
+| POST   | `/auth/reset-password` | Não  |
 
 **Body:**
 
@@ -215,9 +215,9 @@ Em validação (422), a resposta pode incluir lista de erros por campo.
 
 #### 3.2.6 Confirmar conta (SMS)
 
-| Método | Rota             | Auth |
-|--------|------------------|------|
-| POST   | `/auth/confirm`  | Não  |
+| Método | Rota            | Auth |
+| ------ | --------------- | ---- |
+| POST   | `/auth/confirm` | Não  |
 
 **Body:**
 
@@ -245,9 +245,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.3.1 Listar profissões
 
-| Método | Rota               | Auth |
-|--------|--------------------|------|
-| GET    | `/professions`     | Não  |
+| Método | Rota           | Auth |
+| ------ | -------------- | ---- |
+| GET    | `/professions` | Não  |
 
 **Response 200:**
 
@@ -265,9 +265,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.3.2 Obter profissão por ID
 
-| Método | Rota                | Auth |
-|--------|---------------------|------|
-| GET    | `/professions/:id`  | Não  |
+| Método | Rota               | Auth |
+| ------ | ------------------ | ---- |
+| GET    | `/professions/:id` | Não  |
 
 **Response 200:**
 
@@ -286,7 +286,7 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 #### 3.3.3 Expertises da profissão
 
 | Método | Rota                          | Auth |
-|--------|-------------------------------|------|
+| ------ | ----------------------------- | ---- |
 | GET    | `/professions/:id/expertises` | Não  |
 
 **Response 200:**
@@ -308,9 +308,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.3.4 Criar profissão
 
-| Método | Rota               | Auth |
-|--------|--------------------|------|
-| POST   | `/professions`     | Não  |
+| Método | Rota           | Auth |
+| ------ | -------------- | ---- |
+| POST   | `/professions` | Não  |
 
 **Body:**
 
@@ -336,9 +336,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.3.5 Atualizar profissão
 
-| Método | Rota                | Auth |
-|--------|---------------------|------|
-| PUT    | `/professions/:id`  | Não  |
+| Método | Rota               | Auth |
+| ------ | ------------------ | ---- |
+| PUT    | `/professions/:id` | Não  |
 
 **Body:**
 
@@ -356,9 +356,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.3.6 Suspender profissão
 
-| Método | Rota                        | Auth |
-|--------|-----------------------------|------|
-| PATCH  | `/professions/:id/suspend`  | Não  |
+| Método | Rota                       | Auth |
+| ------ | -------------------------- | ---- |
+| PATCH  | `/professions/:id/suspend` | Não  |
 
 **Response 200:**
 
@@ -374,9 +374,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.3.7 Remover profissão
 
-| Método | Rota                | Auth |
-|--------|---------------------|------|
-| DELETE | `/professions/:id`  | Não  |
+| Método | Rota               | Auth |
+| ------ | ------------------ | ---- |
+| DELETE | `/professions/:id` | Não  |
 
 **Response 200:**
 
@@ -392,9 +392,9 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
 
 #### 3.4.1 Buscar mecânicos próximos (público)
 
-| Método | Rota           | Auth |
-|--------|----------------|------|
-| GET    | `/sos/nearby`  | Não  |
+| Método | Rota          | Auth |
+| ------ | ------------- | ---- |
+| GET    | `/sos/nearby` | Não  |
 
 **Query params:**
 
@@ -419,9 +419,7 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
     "status": "free | busy | pending",
     "yearsOfExperience": "number",
     "responseRate": "number (ex: 95)",
-    "expertises": [
-      { "id": "number", "name": "string" }
-    ]
+    "expertises": [{ "id": "number", "name": "string" }]
   }
 ]
 ```
@@ -432,9 +430,9 @@ Só retorna profissionais com `status: 'free'` e `isVerified: true`.
 
 #### 3.4.2 Criar pedido SOS (autenticado – cliente)
 
-| Método | Rota             | Auth        |
-|--------|------------------|-------------|
-| POST   | `/sos/request`   | Bearer token|
+| Método | Rota           | Auth         |
+| ------ | -------------- | ------------ |
+| POST   | `/sos/request` | Bearer token |
 
 **Header:** `Authorization: Bearer <token>`
 
@@ -472,9 +470,9 @@ Só retorna profissionais com `status: 'free'` e `isVerified: true`.
 
 #### 3.4.3 Obter pedido SOS (autenticado – dono do pedido)
 
-| Método | Rota                  | Auth        |
-|--------|-----------------------|-------------|
-| GET    | `/sos/request/:id`    | Bearer token|
+| Método | Rota               | Auth         |
+| ------ | ------------------ | ------------ |
+| GET    | `/sos/request/:id` | Bearer token |
 
 **Response 200:** Estrutura varia conforme `status`.
 
@@ -500,13 +498,35 @@ Inclui também `problemDescription` e `professional` completo, por exemplo:
 
 **Erros:** 401 sem token; 404 pedido não encontrado ou não pertence ao usuário.
 
+Quando o trabalho estiver em andamento ou concluído, o backend também pode retornar:
+
+- `status: "in_progress"` – mecânico iniciou o trabalho.
+- `status: "completed"` – trabalho concluído (cliente pode ser convidado a avaliar).
+
 ---
 
-#### 3.4.4 Confirmar pedido SOS (autenticado – profissional)
+#### 3.4.4 Obter pedido SOS ativo (autenticado – dono do pedido)
 
-| Método | Rota                        | Auth        |
-|--------|-----------------------------|-------------|
-| POST   | `/sos/request/:id/confirm`  | Bearer token|
+| Método | Rota                  | Auth         |
+| ------ | --------------------- | ------------ |
+| GET    | `/sos/request/active` | Bearer token |
+
+Retorna o último pedido SOS do cliente que ainda **não** está `completed` nem `canceled`.
+
+**Response 200:**
+
+- Se existir pedido ativo: mesmo formato de `GET /sos/request/:id`.
+- Se não existir pedido ativo: `null`.
+
+**Erros:** 401 sem token.
+
+---
+
+#### 3.4.5 Confirmar pedido SOS (autenticado – profissional)
+
+| Método | Rota                       | Auth         |
+| ------ | -------------------------- | ------------ |
+| POST   | `/sos/request/:id/confirm` | Bearer token |
 
 **Response 200:**
 
@@ -521,11 +541,11 @@ Inclui também `problemDescription` e `professional` completo, por exemplo:
 
 ---
 
-#### 3.4.5 Recusar pedido SOS (autenticado – profissional)
+#### 3.4.6 Recusar pedido SOS (autenticado – profissional)
 
-| Método | Rota                       | Auth        |
-|--------|----------------------------|-------------|
-| POST   | `/sos/request/:id/reject`   | Bearer token|
+| Método | Rota                      | Auth         |
+| ------ | ------------------------- | ------------ |
+| POST   | `/sos/request/:id/reject` | Bearer token |
 
 **Response 200:**
 
@@ -540,11 +560,11 @@ Inclui também `problemDescription` e `professional` completo, por exemplo:
 
 ---
 
-#### 3.4.6 Cancelar pedido SOS (autenticado – cliente)
+#### 3.4.7 Cancelar pedido SOS (autenticado – cliente)
 
-| Método | Rota                       | Auth        |
-|--------|----------------------------|-------------|
-| POST   | `/sos/request/:id/cancel`  | Bearer token|
+| Método | Rota                      | Auth         |
+| ------ | ------------------------- | ------------ |
+| POST   | `/sos/request/:id/cancel` | Bearer token |
 
 **Response 200:**
 
@@ -561,11 +581,19 @@ Inclui também `problemDescription` e `professional` completo, por exemplo:
 
 #### 3.4.7 Webhook SMS (público – uso do provedor de SMS)
 
-| Método | Rota                 | Auth |
-|--------|----------------------|------|
-| POST   | `/sos/sms/webhook`   | Não  |
+| Método | Rota               | Auth |
+| ------ | ------------------ | ---- |
+| POST   | `/sos/sms/webhook` | Não  |
 
-Recebe resposta do profissional por SMS (1 = aceitar, 2 = recusar). Body depende do provedor; a API espera campos como `From`/`from`/`msisdn` e `Body`/`body`/`message`.
+Recebe resposta do profissional por SMS. Body depende do provedor; a API espera campos como `From`/`from`/`msisdn` e `Body`/`body`/`message`.
+
+Comandos aceitos:
+
+- `1 <id>` (ou `1id`): aceitar pedido SOS.
+- `2 <id>` (ou `2id`): recusar pedido SOS.
+- `3 <id>` (ou `3id`): marcar início do trabalho.
+- `4 <id>` (ou `4id`): marcar conclusão do trabalho.
+- `9`: ajuda (envia SMS com instruções).
 
 **Response 200 (aceitar):**
 
@@ -603,9 +631,10 @@ Recebe resposta do profissional por SMS (1 = aceitar, 2 = recusar). Body depende
 1. GET `/sos/nearby?latitude=&longitude=&radius=` → listar mecânicos.
 2. Usuário escolhe um profissional (usar `id` do item da lista = `professionalId`).
 3. POST `/sos/request` (autenticado) com `professionalId`, `problemDescription`, `location` → recebe `requestId`.
-4. GET `/sos/request/:id` para polling do status (`notifying` → `notified` → `confirmed` ou `canceled`).
-5. Se confirmado, exibir dados completos do profissional (incluindo contato).
-6. Cliente pode cancelar com POST `/sos/request/:id/cancel`.
+4. GET `/sos/request/:id` para polling do status (`notifying` → `notified` → `confirmed` → `in_progress` → `completed` ou `canceled`).
+5. Quando `status = "confirmed"`, exibir dados completos do profissional (incluindo contato).
+6. Cliente pode cancelar com POST `/sos/request/:id/cancel` enquanto não estiver `completed`.
+7. Após `status = "completed"`, cliente pode avaliar o mecânico com POST `/sos/request/:id/rate`.
 
 ### 4.3 Fluxo SOS (profissional)
 
@@ -618,8 +647,8 @@ Recebe resposta do profissional por SMS (1 = aceitar, 2 = recusar). Body depende
 
 - **Roles:** `client`, `professional`. Um usuário pode ter ambos.
 - **Status do perfil profissional:** `free`, `busy`, `pending` (só `free` aparece em “mecânicos próximos”).
-- **Status do pedido SOS:** `notifying`, `notified`, `confirmed`, `canceled`.
-- **MSISDN:** sempre em formato E.164 (ex.: `+258841234567`).
+- **Status do pedido SOS:** `notifying`, `notified`, `confirmed`, `in_progress`, `completed`, `canceled`.
+- **MSISDN:** formato Moçambique – 9 dígitos (ex.: `841234567`), sem +258.
 - **Datas:** ISO 8601 (ex.: `createdAt`, `smsSentAt`, `confirmedAt`).
 - **Localização:** latitude/longitude em números; no backend a coluna `location` é armazenada como PostGIS POINT (o front envia apenas `{ latitude, longitude }` onde a API pede).
 
@@ -649,26 +678,33 @@ Use o texto abaixo como base para criar o prompt (para um dev ou para uma IA) qu
 Construa o frontend da aplicação Mechanics usando a API REST documentada em docs/FRONTEND_API_SPEC.md.
 
 Requisitos gerais:
+
 - Base URL da API: [definir, ex: http://localhost:3333]. Não há prefixo /api.
 - Autenticação: Bearer token no header Authorization. Token obtido em POST /auth/login (msisdn + password). Persistir token e user (ex.: localStorage/sessionStorage ou estado global). Em 401, redirecionar para login.
 - Todas as requisições e respostas são JSON. Tratar erros 400, 401, 403, 404, 422 e 500 conforme formato da especificação (message, code quando existir).
 
 Escopo do frontend (ajustar conforme necessidade):
+
 1. Telas de autenticação: registro (cliente e profissional) apenas com msisdn, login com msisdn e senha, esqueci senha (msisdn), redefinir senha, confirmar conta com código recebido por SMS.
 2. Para clientes: listar mecânicos próximos (GET /sos/nearby com latitude, longitude, radius opcional), criar pedido SOS (POST /sos/request com professionalId, problemDescription, location), ver detalhe do pedido (GET /sos/request/:id) com polling até status confirmed ou canceled, cancelar pedido (POST /sos/request/:id/cancel). professionalId é o id do item retornado em /sos/nearby.
 3. Para profissionais: confirmar pedido (POST /sos/request/:id/confirm) e recusar (POST /sos/request/:id/reject). Assumir que o profissional recebe o requestId por outro meio (notificação, lista de pedidos, etc.) até que exista endpoint de listagem no backend.
 4. Profissões: listar (GET /professions) e, no registro de profissional, listar expertises (GET /professions/:id/expertises) se necessário para UI.
 
 Regras de negócio a refletir na UI:
+
 - Só usuário com role client pode criar/cancelar pedido SOS; só professional pode confirmar/recusar.
 - Em /sos/nearby, distance vem como string (ex.: "1.85 km"). Status do profissional: free | busy | pending.
-- Status do pedido: notifying → notified → confirmed ou canceled. Quando status for confirmed, a resposta de GET /sos/request/:id inclui dados completos do profissional (telefone, etc.) para o cliente contactar.
+- Status do pedido: notifying → notified → confirmed → in_progress → completed ou canceled. Quando status for confirmed (ou posterior), a resposta de GET /sos/request/:id inclui dados completos do profissional (telefone, etc.) para o cliente contactar.
 
 Stack e UX (exemplo – ajustar):
+
 - [Ex.: React/Next.js + TypeScript, ou React Native, etc.]
 - [Ex.: tratamento de loading, erro e estados vazios em todas as listagens e formulários]
 - [Ex.: uso de geolocalização do browser para preencher latitude/longitude em “mecânicos próximos” e ao criar pedido]
 ```
 
 Referência única da API: docs/FRONTEND_API_SPEC.md (contém todos os endpoints, body, response e códigos de erro).
+
+```
+
 ```

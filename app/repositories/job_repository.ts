@@ -1,7 +1,7 @@
 import Job from '#models/job'
 import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
-import { LocationService } from '#services/location_service'
+import db from '@adonisjs/lucid/services/db'
 
 export class JobRepository {
   /**
@@ -37,6 +37,39 @@ export class JobRepository {
     return await Job.query()
       .where('professional_id', professionalId)
       .where('status', 'open')
+      .orderBy('created_at', 'desc')
+      .first()
+  }
+
+  /**
+   * Finds latest accepted job by professional ID
+   */
+  async findAcceptedJobByProfessionalId(professionalId: number): Promise<Job | null> {
+    return await Job.query()
+      .where('professional_id', professionalId)
+      .where('status', 'accepted')
+      .orderBy('created_at', 'desc')
+      .first()
+  }
+
+  /**
+   * Finds latest started job by professional ID
+   */
+  async findStartedJobByProfessionalId(professionalId: number): Promise<Job | null> {
+    return await Job.query()
+      .where('professional_id', professionalId)
+      .where('status', 'started')
+      .orderBy('created_at', 'desc')
+      .first()
+  }
+
+  /**
+   * Finds latest active job (not completed/canceled) by client user ID
+   */
+  async findActiveByUserId(userId: number): Promise<Job | null> {
+    return await Job.query()
+      .where('user_id', userId)
+      .whereNotIn('status', ['completed', 'canceled'])
       .orderBy('created_at', 'desc')
       .first()
   }
@@ -106,6 +139,33 @@ export class JobRepository {
   }
 
   /**
+   * Marks job as started
+   */
+  async start(id: number, trx?: TransactionClientContract): Promise<Job | null> {
+    return await this.update(
+      id,
+      {
+        status: 'started',
+      },
+      trx
+    )
+  }
+
+  /**
+   * Marks job as completed and resolved
+   */
+  async complete(id: number, trx?: TransactionClientContract): Promise<Job | null> {
+    return await this.update(
+      id,
+      {
+        status: 'completed',
+        resolved: true,
+      },
+      trx
+    )
+  }
+
+  /**
    * Rejects a job
    */
   async reject(id: number, trx?: TransactionClientContract): Promise<Job | null> {
@@ -120,36 +180,23 @@ export class JobRepository {
   }
 
   /**
-   * Calculates distance between job location and professional location
+   * Calculates distance in km between job location and professional profile location.
+   * Uses PostGIS ST_Distance in the database so it does not depend on how the driver
+   * serializes geography columns (e.g. WKT vs EWKB).
    */
   async calculateDistanceToProfessional(
     jobId: number,
-    professionalLocation: string
+    professionalProfileId: number
   ): Promise<number> {
-    const job = await this.findById(jobId)
-    if (!job || !job.location) {
-      return 0
-    }
-
-    const locationService = new LocationService()
-
-    // Extract coordinates from PostGIS strings
-    const jobMatch = job.location.match(/POINT\(([\d.]+)\s+([\d.]+)\)/)
-    const profMatch = professionalLocation.match(/POINT\(([\d.]+)\s+([\d.]+)\)/)
-
-    if (!jobMatch || !profMatch) {
-      return 0
-    }
-
-    const jobPoint = {
-      longitude: Number.parseFloat(jobMatch[1]),
-      latitude: Number.parseFloat(jobMatch[2]),
-    }
-    const profPoint = {
-      longitude: Number.parseFloat(profMatch[1]),
-      latitude: Number.parseFloat(profMatch[2]),
-    }
-
-    return await locationService.calculateDistance(jobPoint, profPoint)
+    const result = await db.rawQuery(
+      `
+      SELECT ST_Distance(j.location::geography, pp.location::geography) / 1000 as distance_km
+      FROM jobs j
+      CROSS JOIN professional_profiles pp
+      WHERE j.id = ? AND pp.id = ?
+      `,
+      [jobId, professionalProfileId]
+    )
+    return Number.parseFloat(result.rows[0]?.distance_km ?? '0')
   }
 }

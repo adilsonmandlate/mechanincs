@@ -6,9 +6,12 @@ import GetSosRequestUseCase from '#usecases/sos/get_sos_request_usecase'
 import ConfirmSosRequestUseCase from '#usecases/sos/confirm_sos_request_usecase'
 import RejectSosRequestUseCase from '#usecases/sos/reject_sos_request_usecase'
 import CancelSosRequestUseCase from '#usecases/sos/cancel_sos_request_usecase'
+import RateSosRequestUseCase from '#usecases/sos/rate_sos_request_usecase'
+import GetActiveSosRequestUseCase from '#usecases/sos/get_active_sos_request_usecase'
 import { ProfessionalProfileRepository } from '#repositories/professional_profile_repository'
 import { findNearbyMechanicsValidator } from '#validators/sos/find_nearby_mechanics_validator'
 import { createSosRequestValidator } from '#validators/sos/create_sos_request_validator'
+import { rateSosRequestValidator } from '#validators/sos/rate_sos_request_validator'
 
 export default class SosController {
   @inject()
@@ -38,6 +41,16 @@ export default class SosController {
     const user = auth.getUserOrFail()
     const requestId = Number.parseInt(params.id)
     const result = await getSosRequestUseCase.execute({ requestId, userId: user.id })
+    return response.ok(result)
+  }
+
+  @inject()
+  async getActive(
+    { response, auth }: HttpContext,
+    getActiveSosRequestUseCase: GetActiveSosRequestUseCase
+  ) {
+    const user = auth.getUserOrFail()
+    const result = await getActiveSosRequestUseCase.execute({ userId: user.id })
     return response.ok(result)
   }
 
@@ -121,6 +134,22 @@ export default class SosController {
     const user = auth.getUserOrFail()
     const requestId = Number.parseInt(params.id)
     const result = await cancelSosRequestUseCase.execute({ requestId, userId: user.id })
+    return response.ok(result)
+  }
+
+  @inject()
+  async rate(
+    { params, request, response, auth }: HttpContext,
+    rateSosRequestUseCase: RateSosRequestUseCase
+  ) {
+    const user = auth.getUserOrFail()
+    const requestId = Number.parseInt(params.id)
+    const payload = await request.validateUsing(rateSosRequestValidator)
+    const result = await rateSosRequestUseCase.execute({
+      requestId,
+      userId: user.id,
+      data: payload,
+    })
     return response.ok(result)
   }
 }

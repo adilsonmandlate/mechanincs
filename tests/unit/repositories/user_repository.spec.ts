@@ -73,4 +73,3 @@ test.group('UserRepository', (group) => {
     assert.equal(user.email, 'newuser@example.com')
   })
 })
-

@@ -24,7 +24,7 @@ export function toPostGISPoint(point: LocationPoint): string {
 export function fromPostGISPoint(pointString: string): LocationPoint {
   const match = pointString.match(/POINT\(([\d.]+)\s+([\d.]+)\)/)
   if (!match) {
-    throw new Error('Invalid PostGIS POINT format')
+    throw new Error('Formato inválido de POINT do PostGIS')
   }
   return {
     longitude: Number.parseFloat(match[1]),

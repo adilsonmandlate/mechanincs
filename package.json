@@ -22,6 +22,7 @@
     "#services/*": "./app/services/*.js",
     "#listeners/*": "./app/listeners/*.js",
     "#enums/*": "./app/enums/*.js",
+    "#utils/*": "./app/utils/*.js",
     "#usecases/*": "./app/usecases/*.js",
     "#repositories/*": "./app/repositories/*.js",
     "#events/*": "./app/events/*.js",

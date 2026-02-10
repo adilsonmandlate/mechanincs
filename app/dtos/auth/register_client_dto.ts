@@ -5,4 +5,3 @@ export interface RegisterClientDto {
   gender: 'male' | 'female'
   birthdate?: Date
 }
-
