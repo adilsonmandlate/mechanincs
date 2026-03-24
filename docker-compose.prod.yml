@@ -32,6 +32,8 @@ services:
   postgres:
     image: postgis/postgis:17-3.4
     container_name: mechanics-postgres
+    env_file:
+      - ./api/.env
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
