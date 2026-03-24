@@ -14,7 +14,7 @@ export class EmailService {
     // TODO: Integrate with email service provider
     const verificationUrl = `${process.env.APP_URL || 'http://localhost:3333'}/auth/verify-email?token=${token}`
 
-    logger.info(`[EmailService] Verification email would be sent to ${email}`)
+    logger.info(`[EmailService] Verification email would be sent to ${email} - ${name}`)
     logger.info(`[EmailService] Verification URL: ${verificationUrl}`)
 
     // In production, use something like:
@@ -32,7 +32,7 @@ export class EmailService {
     // TODO: Integrate with email service provider
     const resetUrl = `${process.env.APP_URL || 'http://localhost:3333'}/auth/reset-password?token=${token}`
 
-    logger.info(`[EmailService] Password reset email would be sent to ${email}`)
+    logger.info(`[EmailService] Password reset email would be sent to ${email} - ${name}`)
     logger.info(`[EmailService] Reset URL: ${resetUrl}`)
 
     // In production, use something like:
