@@ -1,0 +1,54 @@
+name: Deploy MECHANICS API
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Install deps and build
+        run: |
+          npm ci
+          npm run build
+
+          find ./build -type f -name "*.map" -print -delete || true
+
+      - name: Sync build and Docker config to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }} 'mkdir -p ${{ secrets.MECHANICS_PROJECT_FOLDER }}'
+
+          rsync -avz --delete --exclude='tests' --exclude='*.map' ./build/ ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }}:${{ secrets.MECHANICS_PROJECT_FOLDER }}/api
+          rsync -avz ./Dockerfile.prod ./package.json ./package-lock.json ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }}:${{ secrets.MECHANICS_PROJECT_FOLDER }}/api
+          rsync -avz ./docker-compose.prod.yml ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }}:${{ secrets.MECHANICS_PROJECT_FOLDER }}
+
+      - name: Create .env on server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }} << 'EOF'
+          cat > ${{ secrets.MECHANICS_PROJECT_FOLDER }}/api/.env << 'EOL'
+          ${{ secrets.MECHANICS_ENV_FILE }}
+          EOL
+          EOF
+
+      - name: Ensure shared network exists
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }} \
+            "docker network inspect acd-network >/dev/null 2>&1 || docker network create acd-network"
+
+      - name: Rebuild and restart API
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }} "
+            cd ${{ secrets.MECHANICS_PROJECT_FOLDER }} &&
+            docker compose -f docker-compose.prod.yml build --no-cache app &&
+            docker compose -f docker-compose.prod.yml up -d app
+          "
