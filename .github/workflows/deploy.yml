@@ -38,6 +38,9 @@ jobs:
           cat > ${{ secrets.MECHANICS_PROJECT_FOLDER }}/api/.env << 'EOL'
           ${{ secrets.MECHANICS_ENV_FILE }}
           EOL
+          cat > ${{ secrets.MECHANICS_PROJECT_FOLDER }}/.env << 'EOL'
+          ${{ secrets.MECHANICS_ENV_FILE }}
+          EOL
           EOF
 
       - name: Ensure shared network exists
@@ -49,6 +52,6 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }} "
             cd ${{ secrets.MECHANICS_PROJECT_FOLDER }} &&
-            docker compose -f docker-compose.prod.yml build --no-cache mechanics-api &&
-            docker compose -f docker-compose.prod.yml up -d mechanics-api
+            docker compose -f docker-compose.prod.yml build --no-cache api &&
+            docker compose -f docker-compose.prod.yml up -d api
           "
