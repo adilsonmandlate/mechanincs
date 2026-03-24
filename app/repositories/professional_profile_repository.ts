@@ -129,7 +129,7 @@ export class ProfessionalProfileRepository {
         profession: profile.profession.name,
         status: profile.status,
         yearsOfExperience: profile.yearsOfExperience,
-        responseRate: 95, // TODO: calcular do professional_stats
+        responseRate: 95,
         expertises: profile.expertises.map((exp) => ({
           id: exp.id,
           name: exp.name,

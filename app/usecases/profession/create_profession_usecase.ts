@@ -1,7 +1,7 @@
-import { inject } from '@adonisjs/core/container'
-import { ProfessionRepository } from '#repositories/profession_repository'
-import { BadRequestException } from '#exceptions/generic/bad_request_exception'
 import type { CreateProfessionDto } from '#dtos/profession/create_profession_dto'
+import { BadRequestException } from '#exceptions/generic/bad_request_exception'
+import { ProfessionRepository } from '#repositories/profession_repository'
+import { inject } from '@adonisjs/core/container'
 
 @inject()
 export default class CreateProfessionUseCase {
