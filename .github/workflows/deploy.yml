@@ -52,6 +52,6 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.PROD_SERVER_IP }} "
             cd ${{ secrets.MECHANICS_PROJECT_FOLDER }} &&
-            docker compose -f docker-compose.prod.yml build --no-cache api &&
-            docker compose -f docker-compose.prod.yml up -d api
+            docker compose -f docker-compose.prod.yml build --no-cache mechanics-api &&
+            docker compose -f docker-compose.prod.yml up -d mechanics-api
           "

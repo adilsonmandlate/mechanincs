@@ -1,5 +1,5 @@
 services:
-  api:
+  mechanics-api:
     build:
       context: ./api
       dockerfile: Dockerfile.prod
