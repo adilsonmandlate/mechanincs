@@ -9,6 +9,14 @@
 
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+import {
+  authThrottle,
+  loginThrottle,
+  resetThrottle,
+  smsWebhookThrottle,
+  sosAuthenticatedThrottle,
+  sosNearbyThrottle,
+} from './limiter.js'
 const AuthController = () => import('#controllers/auth_controller')
 const ProfessionController = () => import('#controllers/profession_controller')
 const SosController = () => import('#controllers/sos_controller')
@@ -28,16 +36,17 @@ router
     router.post('/register/professional', [AuthController, 'registerProfessional'])
 
     // Authentication
-    router.post('/login', [AuthController, 'login'])
+    router.post('/login', [AuthController, 'login']).use(loginThrottle)
 
     // Password reset
-    router.post('/forgot-password', [AuthController, 'forgotPassword'])
-    router.post('/reset-password', [AuthController, 'resetPassword'])
+    router.post('/forgot-password', [AuthController, 'forgotPassword']).use(resetThrottle)
+    router.post('/reset-password', [AuthController, 'resetPassword']).use(resetThrottle)
 
     // Email/SMS verification
     router.post('/confirm', [AuthController, 'confirmUser'])
   })
   .prefix('/auth')
+  .use(authThrottle)
 
 // Profession routes
 router
@@ -45,10 +54,15 @@ router
     router.get('/', [ProfessionController, 'index'])
     router.get('/:id/expertises', [ProfessionController, 'expertises'])
     router.get('/:id', [ProfessionController, 'show'])
-    router.post('/', [ProfessionController, 'store'])
-    router.put('/:id', [ProfessionController, 'update'])
-    router.patch('/:id/suspend', [ProfessionController, 'suspend'])
-    router.delete('/:id', [ProfessionController, 'destroy'])
+
+    router
+      .group(() => {
+        router.post('/', [ProfessionController, 'store'])
+        router.put('/:id', [ProfessionController, 'update'])
+        router.patch('/:id/suspend', [ProfessionController, 'suspend'])
+        router.delete('/:id', [ProfessionController, 'destroy'])
+      })
+      .use([middleware.auth(), middleware.admin()])
   })
   .prefix('/professions')
 
@@ -56,10 +70,10 @@ router
 router
   .group(() => {
     // Public route - find nearby mechanics
-    router.get('/nearby', [SosController, 'findNearby'])
+    router.get('/nearby', [SosController, 'findNearby']).use(sosNearbyThrottle)
 
     // Public route - SMS webhook (receives SMS responses)
-    router.post('/sms/webhook', [SosController, 'handleSmsResponse'])
+    router.post('/sms/webhook', [SosController, 'handleSmsResponse']).use(smsWebhookThrottle)
 
     // Protected routes - require authentication
     router
@@ -73,5 +87,6 @@ router
         router.post('/request/:id/rate', [SosController, 'rate'])
       })
       .use(middleware.auth())
+      .use(sosAuthenticatedThrottle)
   })
   .prefix('/sos')

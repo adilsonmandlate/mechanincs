@@ -33,6 +33,10 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       })
     }
 
+    if (error.status && error.status < 500) {
+      return super.handle(error, ctx)
+    }
+
     logger.error(error)
     return response.status(500).json({
       message: 'Erro interno do servidor',
