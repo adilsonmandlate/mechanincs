@@ -4,6 +4,15 @@ export default class Jobs extends BaseSchema {
   protected tableName = 'jobs'
 
   async up() {
+    this.schema.raw(`
+      DO $$
+      BEGIN
+        CREATE TYPE job_status_enum AS ENUM ('open', 'accepted', 'started', 'completed', 'canceled');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `)
+
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
 
@@ -29,12 +38,7 @@ export default class Jobs extends BaseSchema {
 
       table.string('location').notNullable()
 
-      table
-        .enu('status', ['open', 'accepted', 'started', 'completed', 'canceled'], {
-          useNative: true,
-          enumName: 'job_status_enum',
-        })
-        .notNullable()
+      table.specificType('status', 'job_status_enum').notNullable()
 
       table.boolean('resolved').notNullable().defaultTo(false)
 
@@ -44,5 +48,6 @@ export default class Jobs extends BaseSchema {
 
   async down() {
     this.schema.dropTable(this.tableName)
+    this.schema.raw('DROP TYPE IF EXISTS job_status_enum')
   }
 }

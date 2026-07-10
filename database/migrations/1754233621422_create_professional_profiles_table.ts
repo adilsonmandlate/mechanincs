@@ -4,6 +4,24 @@ export default class ProfessionalProfiles extends BaseSchema {
   protected tableName = 'professional_profiles'
 
   async up() {
+    this.schema.raw(`
+      DO $$
+      BEGIN
+        CREATE TYPE education_level_enum AS ENUM ('none', 'primary', 'secondary', 'university', 'master', 'phd');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `)
+
+    this.schema.raw(`
+      DO $$
+      BEGIN
+        CREATE TYPE professional_status_enum AS ENUM ('free', 'busy', 'pending');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `)
+
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
 
@@ -23,22 +41,12 @@ export default class ProfessionalProfiles extends BaseSchema {
         .inTable('professions')
         .onDelete('RESTRICT')
 
-      table
-        .enu('education', ['none', 'primary', 'secondary', 'university', 'master', 'phd'], {
-          useNative: true,
-          enumName: 'education_level_enum',
-        })
-        .notNullable()
+      table.specificType('education', 'education_level_enum').notNullable()
 
       table.integer('years_of_experience').unsigned().notNullable()
       table.text('about').nullable()
 
-      table
-        .enu('status', ['free', 'busy', 'pending'], {
-          useNative: true,
-          enumName: 'professional_status_enum',
-        })
-        .notNullable()
+      table.specificType('status', 'professional_status_enum').notNullable()
 
       table.decimal('rating_avg', 3, 2).notNullable().defaultTo(0)
       table.integer('rating_count').notNullable().defaultTo(0)
@@ -53,5 +61,7 @@ export default class ProfessionalProfiles extends BaseSchema {
 
   async down() {
     this.schema.dropTable(this.tableName)
+    this.schema.raw('DROP TYPE IF EXISTS professional_status_enum')
+    this.schema.raw('DROP TYPE IF EXISTS education_level_enum')
   }
 }

@@ -4,6 +4,15 @@ export default class JobEvents extends BaseSchema {
   protected tableName = 'job_events'
 
   async up() {
+    this.schema.raw(`
+      DO $$
+      BEGIN
+        CREATE TYPE job_event_type_enum AS ENUM ('created', 'accepted', 'started', 'completed', 'canceled');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `)
+
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
 
@@ -15,12 +24,7 @@ export default class JobEvents extends BaseSchema {
         .inTable('jobs')
         .onDelete('CASCADE')
 
-      table
-        .enu('event_type', ['created', 'accepted', 'started', 'completed', 'canceled'], {
-          useNative: true,
-          enumName: 'job_event_type_enum',
-        })
-        .notNullable()
+      table.specificType('event_type', 'job_event_type_enum').notNullable()
 
       table
         .integer('user_id')
@@ -38,5 +42,6 @@ export default class JobEvents extends BaseSchema {
 
   async down() {
     this.schema.dropTable(this.tableName)
+    this.schema.raw('DROP TYPE IF EXISTS job_event_type_enum')
   }
 }
