@@ -13,7 +13,7 @@ const corsConfig = defineConfig({
       return true
     }
 
-    return ['https://mechanics.arrentis.co', 'http://mechanics.arrentis.co']
+    return ['https://mechanics.arrentis.co']
   },
   methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   headers: true,
