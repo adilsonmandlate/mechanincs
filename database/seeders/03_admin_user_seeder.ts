@@ -12,12 +12,11 @@ export default class extends BaseSeeder {
     let user = await User.query().where('email', email).orWhere('msisdn', msisdn).first()
 
     if (!user) {
-      const password = await hash.make('Admin123!')
       user = await User.create({
         name: 'Admin Demo',
         email,
         msisdn,
-        password,
+        password: 'Admin123!',
         gender: 'male',
         emailVerifiedAt: DateTime.now(),
         msisdnVerifiedAt: DateTime.now(),
