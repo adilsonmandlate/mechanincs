@@ -1,5 +1,5 @@
 import JobEvent from '#models/job_event'
-import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export class JobEventRepository {
   /**

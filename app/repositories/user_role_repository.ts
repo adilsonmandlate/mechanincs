@@ -1,5 +1,5 @@
 import UserRole from '#models/user_role'
-import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export class UserRoleRepository {
   /**

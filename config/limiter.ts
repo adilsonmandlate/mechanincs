@@ -1,4 +1,5 @@
 import { defineConfig, stores } from '@adonisjs/limiter'
+import type { InferLimiters } from '@adonisjs/limiter/types'
 
 const limiterConfig = defineConfig({
   default: 'redis',

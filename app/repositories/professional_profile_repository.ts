@@ -1,5 +1,5 @@
 import ProfessionalProfile from '#models/professional_profile'
-import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { LocationService } from '#services/location_service'
 import db from '@adonisjs/lucid/services/db'
 

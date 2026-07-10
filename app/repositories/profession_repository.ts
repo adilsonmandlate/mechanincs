@@ -1,7 +1,7 @@
 import Profession from '#models/profession'
 import { NotFoundException } from '#exceptions/generic/not_found_exception'
 import { DateTime } from 'luxon'
-import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 export class ProfessionRepository {
   /**

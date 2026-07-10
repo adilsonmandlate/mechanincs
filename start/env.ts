@@ -30,4 +30,10 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_DATABASE: Env.schema.string(),
   DB_POOL_MIN: Env.schema.number.optional(),
   DB_POOL_MAX: Env.schema.number.optional(),
+
+  REDIS_HOST: Env.schema.string({ format: 'host' }),
+  REDIS_PORT: Env.schema.number(),
+  REDIS_PASSWORD: Env.schema.string.optional(),
+  REDIS_DB: Env.schema.number.optional(),
+  REDIS_KEY_PREFIX: Env.schema.string.optional(),
 })

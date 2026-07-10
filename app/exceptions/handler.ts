@@ -1,5 +1,6 @@
 import app from '@adonisjs/core/services/app'
-import { HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import { ExceptionHandler } from '@adonisjs/core/http'
+import type { HttpContext } from '@adonisjs/core/http'
 import { AppException } from '#exceptions/app_exception'
 import logger from '@adonisjs/core/services/logger'
 

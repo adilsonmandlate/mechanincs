@@ -1,5 +1,5 @@
 import Job from '#models/job'
-import { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 
