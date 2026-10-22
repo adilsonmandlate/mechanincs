@@ -2,6 +2,7 @@ import Job from '#models/job'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
+import type { JobStatus } from '#types/assistance'
 
 export class JobRepository {
   /**
@@ -15,7 +16,7 @@ export class JobRepository {
       description: string
       photo: string | null
       location: string
-      status: 'open' | 'accepted' | 'started' | 'completed' | 'canceled'
+      status: JobStatus
       resolved: boolean
     },
     trx?: TransactionClientContract
@@ -28,6 +29,18 @@ export class JobRepository {
    */
   async findById(id: number): Promise<Job | null> {
     return await Job.find(id)
+  }
+
+  async findByIdWithClient(id: number): Promise<Job | null> {
+    return await Job.query().where('id', id).preload('client').first()
+  }
+
+  async findLatestActionableByProfessionalId(professionalId: number): Promise<Job | null> {
+    return await Job.query()
+      .where('professional_id', professionalId)
+      .whereIn('status', ['open', 'accepted', 'started'])
+      .orderBy('created_at', 'desc')
+      .first()
   }
 
   /**
@@ -69,7 +82,20 @@ export class JobRepository {
   async findActiveByUserId(userId: number): Promise<Job | null> {
     return await Job.query()
       .where('user_id', userId)
-      .whereNotIn('status', ['completed', 'canceled'])
+      .whereRaw(
+        `
+        (
+          status NOT IN ('completed', 'canceled')
+          OR (
+            status = 'completed'
+            AND NOT EXISTS (
+              SELECT 1 FROM ratings
+              WHERE ratings.job_id = jobs.id AND ratings.user_id = jobs.user_id
+            )
+          )
+        )
+      `
+      )
       .orderBy('created_at', 'desc')
       .first()
   }
@@ -86,6 +112,7 @@ export class JobRepository {
           profileQuery.preload('profession')
         })
       })
+      .preload('ratings')
       .first()
   }
 

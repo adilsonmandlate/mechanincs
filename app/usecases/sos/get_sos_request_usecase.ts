@@ -1,6 +1,7 @@
 import { inject } from '@adonisjs/core/container'
 import { JobRepository } from '#repositories/job_repository'
 import { NotFoundException } from '#exceptions/generic/not_found_exception'
+import CompletionDispute from '#models/completion_dispute'
 
 @inject()
 export default class GetSosRequestUseCase {
@@ -20,6 +21,7 @@ export default class GetSosRequestUseCase {
 
     const professional = job.professional
     const professionalProfile = professional?.professionalProfile || null
+    const completionDispute = await CompletionDispute.findBy('jobId', job.id)
 
     let distance = 0
     let distanceFormatted = '0 km'
@@ -36,7 +38,10 @@ export default class GetSosRequestUseCase {
     let message =
       'Estamos notificando o mecânico via SMS. Por favor, mantenha-se perto do seu telefone.'
 
-    if (job.smsSentAt && !job.confirmedAt) {
+    if (job.status === 'canceled') {
+      status = 'canceled'
+      message = 'Pedido recusado ou cancelado.'
+    } else if (job.smsSentAt && !job.confirmedAt) {
       status = 'notified'
       message = 'SMS enviado para o mecânico. Aguardando confirmação...'
     } else if (job.confirmedAt && job.status === 'accepted') {
@@ -45,16 +50,23 @@ export default class GetSosRequestUseCase {
     } else if (job.status === 'started') {
       status = 'in_progress'
       message = 'Mecânico iniciou o trabalho. Aguarde a conclusão.'
+    } else if (job.status === 'awaiting_customer_confirmation') {
+      status = 'awaiting_customer_confirmation'
+      message = 'O mecânico indicou que terminou o trabalho. Confirme a conclusão do serviço.'
+    } else if (job.status === 'completion_disputed') {
+      status = 'completion_disputed'
+      message = 'Recebemos o teu reporte e a assistência está em análise.'
     } else if (job.status === 'completed') {
       status = 'completed'
-      message = 'Trabalho concluído. Em breve você poderá avaliar o mecânico.'
-    } else if (job.status === 'canceled') {
-      status = 'canceled'
-      message = 'Pedido cancelado.'
+      message = 'Trabalho concluído. Já podes avaliar o mecânico.'
     }
 
     const hasFullProfessional =
-      (status === 'confirmed' || status === 'in_progress' || status === 'completed') &&
+      (status === 'confirmed' ||
+        status === 'in_progress' ||
+        status === 'awaiting_customer_confirmation' ||
+        status === 'completion_disputed' ||
+        status === 'completed') &&
       professional &&
       professionalProfile
 
@@ -84,6 +96,17 @@ export default class GetSosRequestUseCase {
         problemDescription: job.description,
         smsSentAt: job.smsSentAt,
         confirmedAt: job.confirmedAt,
+        completionDeclaredAt: job.completionDeclaredAt,
+        completedAt: job.completedAt,
+        ratingSubmitted: job.ratings.length > 0,
+        dispute: completionDispute
+          ? {
+              id: completionDispute.id,
+              reason: completionDispute.reason,
+              status: completionDispute.status,
+              createdAt: completionDispute.createdAt,
+            }
+          : null,
         createdAt: job.createdAt,
       }
     }
@@ -100,6 +123,17 @@ export default class GetSosRequestUseCase {
       message,
       smsSentAt: job.smsSentAt,
       confirmedAt: job.confirmedAt,
+      completionDeclaredAt: job.completionDeclaredAt,
+      completedAt: job.completedAt,
+      ratingSubmitted: job.ratings.length > 0,
+      dispute: completionDispute
+        ? {
+            id: completionDispute.id,
+            reason: completionDispute.reason,
+            status: completionDispute.status,
+            createdAt: completionDispute.createdAt,
+          }
+        : null,
       createdAt: job.createdAt,
     }
   }

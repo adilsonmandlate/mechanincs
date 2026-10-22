@@ -3,6 +3,7 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Job from '#models/job'
 import User from '#models/user'
 import { DateTime } from 'luxon'
+import type { JobEventType } from '#types/assistance'
 
 export default class JobEvent extends BaseModel {
   @column({ isPrimary: true })
@@ -12,7 +13,7 @@ export default class JobEvent extends BaseModel {
   declare jobId: number
 
   @column()
-  declare eventType: 'created' | 'accepted' | 'started' | 'completed' | 'canceled'
+  declare eventType: JobEventType
 
   @column()
   declare userId: number

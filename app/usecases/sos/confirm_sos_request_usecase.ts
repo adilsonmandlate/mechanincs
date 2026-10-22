@@ -1,18 +1,23 @@
 import { inject } from '@adonisjs/core/container'
 import { JobRepository } from '#repositories/job_repository'
-import { JobEventRepository } from '#repositories/job_event_repository'
 import { UserRepository } from '#repositories/user_repository'
 import { NotFoundException } from '#exceptions/generic/not_found_exception'
 import { BadRequestException } from '#exceptions/generic/bad_request_exception'
 import { SmsService } from '#services/sms_service'
+import { SmsMessageRepository } from '#repositories/sms_message_repository'
+import { AssistanceRealtimeService } from '#services/assistance_realtime_service'
+import { SosLifecycleService } from '#services/sos_lifecycle_service'
+import { extractSosRequestId, parseSosSmsCommand, sosSmsCommands } from '#services/sos_sms_protocol'
 
 @inject()
 export default class ConfirmSosRequestUseCase {
   constructor(
     private jobRepository: JobRepository,
-    private jobEventRepository: JobEventRepository,
     private userRepository: UserRepository,
-    private smsService: SmsService
+    private smsService: SmsService,
+    private smsMessageRepository: SmsMessageRepository,
+    private realtime: AssistanceRealtimeService,
+    private lifecycle: SosLifecycleService
   ) {}
 
   /**
@@ -24,44 +29,78 @@ export default class ConfirmSosRequestUseCase {
    * - 3 <id> start
    * - 4 <id> complete
    */
-  async executeBySms({ msisdn, response }: { msisdn: string; response: string }) {
+  async executeBySms({
+    msisdn,
+    response,
+    source = 'provider',
+    providerMessageId,
+    expectedRequestId,
+  }: {
+    msisdn: string
+    response: string
+    source?: 'provider' | 'simulator'
+    providerMessageId?: string
+    expectedRequestId?: number
+  }) {
     // Find user by msisdn
     const user = await this.userRepository.findByMsisdn(msisdn)
     if (!user) {
       throw new NotFoundException('Usuário não encontrado.')
     }
 
-    const raw = response.trim()
-    if (!raw) {
-      throw new BadRequestException('Mensagem vazia.')
-    }
-
-    let command: string
-    let requestId: number | null = null
-
-    if (!raw.includes(' ')) {
-      // Formato colado, ex.: "142" => comando "1", requestId 42
-      const digits = raw.replace(/\D/g, '')
-      if (!digits) {
-        throw new BadRequestException('Comando inválido.')
+    if (providerMessageId) {
+      const duplicate = await this.smsMessageRepository.findByProviderMessageId(providerMessageId)
+      if (duplicate) {
+        return {
+          message: 'Mensagem já processada.',
+          requestId: duplicate.jobId,
+          action: 'duplicate',
+        }
       }
-      command = digits[0]
-      const idPart = digits.slice(1)
-      if (idPart) {
-        requestId = Number.parseInt(idPart)
-      }
-    } else {
-      // Formato com espaço, ex.: "1 42"
-      const cleaned = raw.replace(/\s+/g, ' ')
-      const parts = cleaned.split(' ')
-      command = parts[0]
-      const maybeId = parts[1]
-      requestId = maybeId ? Number.parseInt(maybeId) : null
     }
 
-    if (!['1', '2', '3', '4'].includes(command)) {
-      throw new BadRequestException('Comando inválido.')
+    let parsedCommand: ReturnType<typeof parseSosSmsCommand>
+    try {
+      parsedCommand = parseSosSmsCommand(response)
+    } catch (error) {
+      if (!(error instanceof BadRequestException)) throw error
+
+      const referencedRequestId = expectedRequestId ?? extractSosRequestId(response)
+      const unknownJob = referencedRequestId
+        ? await this.jobRepository.findById(referencedRequestId)
+        : await this.jobRepository.findLatestActionableByProfessionalId(user.id)
+
+      if (!unknownJob || unknownJob.professionalId !== user.id) throw error
+
+      const incomingMessage = await this.smsMessageRepository.create({
+        jobId: unknownJob.id,
+        professionalId: user.id,
+        direction: 'inbound',
+        source,
+        body: response.trim(),
+        providerMessageId: providerMessageId ?? null,
+        metadata: { recognized: false },
+      })
+
+      this.realtime.publish({
+        requestId: unknownJob.id,
+        type: 'sms_received',
+        status: unknownJob.status,
+        resourceId: incomingMessage.id,
+      })
+
+      await this.smsService.sendUnknownSosCommandSms(msisdn, unknownJob.id, {
+        simulated: source === 'simulator',
+      })
+
+      return {
+        message: 'Resposta não reconhecida. Foram enviadas novas instruções.',
+        requestId: unknownJob.id,
+        action: 'unknown',
+      }
     }
+
+    const { command, requestId } = parsedCommand
 
     const loadJobByIdOrLatest = async (): Promise<{ job: any; id: number }> => {
       if (requestId && !Number.isNaN(requestId)) {
@@ -93,77 +132,68 @@ export default class ConfirmSosRequestUseCase {
 
     const { job, id } = await loadJobByIdOrLatest()
 
-    if (command === '1') {
-      if (job.status !== 'open') {
-        throw new BadRequestException('Este pedido já foi processado.')
+    if (expectedRequestId && id !== expectedRequestId) {
+      throw new BadRequestException('A mensagem não corresponde a esta conversa.')
+    }
+
+    const incomingMessage = await this.smsMessageRepository.create({
+      jobId: id,
+      professionalId: user.id,
+      direction: 'inbound',
+      source,
+      body: response.trim(),
+      providerMessageId: providerMessageId ?? null,
+    })
+
+    this.realtime.publish({
+      requestId: id,
+      type: 'sms_received',
+      status: job.status,
+      resourceId: incomingMessage.id,
+    })
+
+    if (command === sosSmsCommands.accept) {
+      const result = await this.lifecycle.accept(id, user.id, 'sms')
+
+      if (result.changed) {
+        await this.smsService.sendSosAcceptedSms(msisdn, id, {
+          simulated: source === 'simulator',
+        })
       }
-
-      await this.jobRepository.confirm(id, user.id)
-      await this.jobEventRepository.create({
-        jobId: id,
-        eventType: 'accepted',
-        userId: user.id,
-        metadata: { type: 'sos', confirmedBy: 'sms' },
-      })
-
-      // Step-by-step UX: after accept, send start instructions
-      await this.smsService.sendSosAcceptedSms(msisdn, id)
 
       return { message: 'Pedido SOS aceito com sucesso.', requestId: id, action: 'accepted' }
     }
 
-    if (command === '2') {
-      if (job.status !== 'open') {
-        throw new BadRequestException('Este pedido já foi processado.')
-      }
-
-      await this.jobRepository.reject(id)
-      await this.jobEventRepository.create({
-        jobId: id,
-        eventType: 'canceled',
-        userId: user.id,
-        metadata: { type: 'sos', rejectedBy: 'sms' },
-      })
+    if (command === sosSmsCommands.reject) {
+      await this.lifecycle.reject(id, user.id, 'sms')
 
       return { message: 'Pedido SOS recusado.', requestId: id, action: 'rejected' }
     }
 
-    if (command === '3') {
-      if (job.status !== 'accepted') {
-        throw new BadRequestException('Este pedido ainda não foi aceito.')
+    if (command === sosSmsCommands.start) {
+      const result = await this.lifecycle.start(id, user.id, 'sms')
+
+      if (result.changed) {
+        await this.smsService.sendSosStartedSms(msisdn, id, {
+          simulated: source === 'simulator',
+        })
       }
-
-      await this.jobRepository.start(id)
-      await this.jobEventRepository.create({
-        jobId: id,
-        eventType: 'started',
-        userId: user.id,
-        metadata: { type: 'sos', startedBy: 'sms' },
-      })
-
-      // Step-by-step UX: after start, send complete instructions
-      await this.smsService.sendSosStartedSms(msisdn, id)
 
       return { message: 'Trabalho iniciado com sucesso.', requestId: id, action: 'started' }
     }
 
-    // command === '4'
-    if (job.status !== 'started') {
-      throw new BadRequestException('Este trabalho ainda não foi iniciado.')
+    const result = await this.lifecycle.declareCompletion(id, user.id, 'sms')
+    if (result.changed) {
+      await this.smsService.sendSosCompletedSms(msisdn, id, {
+        simulated: source === 'simulator',
+      })
     }
 
-    await this.jobRepository.complete(id)
-    await this.jobEventRepository.create({
-      jobId: id,
-      eventType: 'completed',
-      userId: user.id,
-      metadata: { type: 'sos', completedBy: 'sms' },
-    })
-
-    // Optional: send final SMS (can be removed to save cost)
-    await this.smsService.sendSosCompletedSms(msisdn, id)
-
-    return { message: 'Trabalho concluído com sucesso.', requestId: id, action: 'completed' }
+    return {
+      message: 'Conclusão registada. Aguardamos a confirmação do cliente.',
+      requestId: id,
+      action: 'completion_declared',
+    }
   }
 
   /**
@@ -180,20 +210,7 @@ export default class ConfirmSosRequestUseCase {
       throw new BadRequestException('Este pedido não pertence a você.')
     }
 
-    if (job.status !== 'open') {
-      throw new BadRequestException('Este pedido já foi processado.')
-    }
-
-    // Confirm job
-    await this.jobRepository.confirm(requestId, userId)
-
-    // Create job event
-    await this.jobEventRepository.create({
-      jobId: requestId,
-      eventType: 'accepted',
-      userId,
-      metadata: { type: 'sos', confirmedBy: 'user' },
-    })
+    await this.lifecycle.accept(requestId, userId, 'user')
 
     return {
       message: 'Pedido SOS confirmado com sucesso.',

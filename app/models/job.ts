@@ -2,9 +2,12 @@ import JobEvent from '#models/job_event'
 import Rating from '#models/rating'
 import Tag from '#models/tag'
 import User from '#models/user'
-import { BaseModel, column, belongsTo, hasMany, manyToMany } from '@adonisjs/lucid/orm'
-import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, belongsTo, hasMany, hasOne, manyToMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, HasOne, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import SmsMessage from '#models/sms_message'
+import CompletionDispute from '#models/completion_dispute'
+import type { JobStatus } from '#types/assistance'
 
 export default class Job extends BaseModel {
   @column({ isPrimary: true })
@@ -29,7 +32,7 @@ export default class Job extends BaseModel {
   declare location: string
 
   @column()
-  declare status: 'open' | 'accepted' | 'started' | 'completed' | 'canceled'
+  declare status: JobStatus
 
   @column()
   declare resolved: boolean
@@ -39,6 +42,12 @@ export default class Job extends BaseModel {
 
   @column.dateTime()
   declare confirmedAt?: DateTime
+
+  @column.dateTime()
+  declare completionDeclaredAt?: DateTime
+
+  @column.dateTime()
+  declare completedAt?: DateTime
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -54,6 +63,12 @@ export default class Job extends BaseModel {
 
   @hasMany(() => Rating)
   declare ratings: HasMany<typeof Rating>
+
+  @hasMany(() => SmsMessage)
+  declare smsMessages: HasMany<typeof SmsMessage>
+
+  @hasOne(() => CompletionDispute)
+  declare completionDispute: HasOne<typeof CompletionDispute>
 
   @manyToMany(() => Tag, {
     pivotTable: 'job_tags',

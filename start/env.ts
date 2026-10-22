@@ -36,4 +36,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   REDIS_PASSWORD: Env.schema.string.optional(),
   REDIS_DB: Env.schema.number.optional(),
   REDIS_KEY_PREFIX: Env.schema.string.optional(),
+
+  DEMO_PROFESSIONAL_RESPONSE_SIMULATION: Env.schema.boolean.optional(),
+  DEMO_SMS_SIMULATOR_ENABLED: Env.schema.boolean.optional(),
 })

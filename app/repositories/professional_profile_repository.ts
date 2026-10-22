@@ -12,6 +12,10 @@ export interface NearbyProfessional {
   rating: number
   ratingCount: number
   distance: string
+  location: {
+    latitude: number
+    longitude: number
+  }
   profession: string
   status: string
   yearsOfExperience: number
@@ -110,12 +114,19 @@ export class ProfessionalProfileRepository {
       .preload('profession')
       .preload('expertises')
       .whereRaw(withinRadiusQuery)
-      .select('*', db.raw(distanceQuery))
+      .select(
+        '*',
+        db.raw(distanceQuery),
+        db.raw('ST_Y(location::geometry) as latitude'),
+        db.raw('ST_X(location::geometry) as longitude')
+      )
       .orderBy('distance_km', 'asc')
       .limit(limit)
 
     return professionals.map((profile) => {
       const distance = Number(profile.$extras?.distance_km ?? 0)
+      const latitude = Number(profile.$extras?.latitude)
+      const longitude = Number(profile.$extras?.longitude)
 
       return {
         id: profile.id,
@@ -126,6 +137,10 @@ export class ProfessionalProfileRepository {
         rating: profile.ratingAvg,
         ratingCount: profile.ratingCount,
         distance: `${Number.parseFloat(distance.toFixed(2))} km`,
+        location: {
+          latitude,
+          longitude,
+        },
         profession: profile.profession.name,
         status: profile.status,
         yearsOfExperience: profile.yearsOfExperience,

@@ -11,6 +11,7 @@ import Rating from '#models/rating'
 import Notification from '#models/notification'
 import ActivityLog from '#models/activity_log'
 import ProfessionalProfile from '#models/professional_profile'
+import SmsMessage from '#models/sms_message'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email', 'msisdn'],
@@ -83,6 +84,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => ActivityLog)
   declare activityLogs: HasMany<typeof ActivityLog>
+
+  @hasMany(() => SmsMessage, { foreignKey: 'professionalId' })
+  declare smsMessages: HasMany<typeof SmsMessage>
 
   @hasOne(() => ProfessionalProfile)
   declare professionalProfile: HasOne<typeof ProfessionalProfile>

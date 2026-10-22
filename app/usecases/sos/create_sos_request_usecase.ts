@@ -2,12 +2,13 @@ import { inject } from '@adonisjs/core/container'
 import { JobRepository } from '#repositories/job_repository'
 import { ProfessionalProfileRepository } from '#repositories/professional_profile_repository'
 import { JobEventRepository } from '#repositories/job_event_repository'
-import { UserRepository } from '#repositories/user_repository'
 import { SmsService } from '#services/sms_service'
+import { DemoProfessionalResponseService } from '#services/demo_professional_response_service'
 import { LocationService } from '#services/location_service'
 import { NotFoundException } from '#exceptions/generic/not_found_exception'
 import { BadRequestException } from '#exceptions/generic/bad_request_exception'
 import type { CreateSosRequestDto } from '#dtos/sos/create_sos_request_dto'
+import { AssistanceRealtimeService } from '#services/assistance_realtime_service'
 
 @inject()
 export default class CreateSosRequestUseCase {
@@ -15,9 +16,10 @@ export default class CreateSosRequestUseCase {
     private jobRepository: JobRepository,
     private professionalProfileRepository: ProfessionalProfileRepository,
     private jobEventRepository: JobEventRepository,
-    private userRepository: UserRepository,
     private smsService: SmsService,
-    private locationService: LocationService
+    private demoProfessionalResponseService: DemoProfessionalResponseService,
+    private locationService: LocationService,
+    private realtime: AssistanceRealtimeService
   ) {}
 
   async execute({ userId, data }: { userId: number; data: CreateSosRequestDto }) {
@@ -63,14 +65,29 @@ export default class CreateSosRequestUseCase {
       metadata: { type: 'sos' },
     })
 
-    const client = await this.userRepository.findById(userId)
-    const clientName = client?.name || 'Cliente'
+    const assignedEvent = await this.jobEventRepository.create({
+      jobId: job.id,
+      eventType: 'assigned',
+      userId,
+      metadata: { type: 'sos', professionalId: professionalUser.id },
+    })
+
+    this.realtime.publish({
+      requestId: job.id,
+      type: 'request_created',
+      status: job.status,
+    })
+    this.realtime.publish({
+      requestId: job.id,
+      type: 'professional_assigned',
+      status: job.status,
+      resourceId: assignedEvent.id,
+    })
 
     // Send SMS to professional
     if (professionalUser.msisdn) {
       await this.smsService.sendSosRequestSms(
         professionalUser.msisdn,
-        clientName,
         data.problemDescription,
         job.id
       )
@@ -78,6 +95,11 @@ export default class CreateSosRequestUseCase {
 
     // Update SMS sent timestamp
     await this.jobRepository.updateSmsSent(job.id)
+
+    await this.demoProfessionalResponseService.respond({
+      jobId: job.id,
+      professionalUserId: professionalUser.id,
+    })
 
     return {
       requestId: job.id,

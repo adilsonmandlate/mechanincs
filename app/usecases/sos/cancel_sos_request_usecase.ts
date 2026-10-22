@@ -1,14 +1,18 @@
 import { inject } from '@adonisjs/core/container'
 import { JobRepository } from '#repositories/job_repository'
-import { JobEventRepository } from '#repositories/job_event_repository'
 import { NotFoundException } from '#exceptions/generic/not_found_exception'
 import { BadRequestException } from '#exceptions/generic/bad_request_exception'
+import { SosLifecycleService } from '#services/sos_lifecycle_service'
+import { SmsService } from '#services/sms_service'
+import { UserRepository } from '#repositories/user_repository'
 
 @inject()
 export default class CancelSosRequestUseCase {
   constructor(
     private jobRepository: JobRepository,
-    private jobEventRepository: JobEventRepository
+    private lifecycle: SosLifecycleService,
+    private smsService: SmsService,
+    private userRepository: UserRepository
   ) {}
 
   async execute({ requestId, userId }: { requestId: number; userId: number }) {
@@ -22,24 +26,14 @@ export default class CancelSosRequestUseCase {
       throw new BadRequestException('Você não tem permissão para cancelar este pedido.')
     }
 
-    if (job.status === 'canceled') {
-      throw new BadRequestException('Este pedido já foi cancelado.')
+    const result = await this.lifecycle.cancel(requestId, userId)
+
+    if (result.changed && result.job.professionalId) {
+      const professional = await this.userRepository.findById(result.job.professionalId)
+      if (professional?.msisdn) {
+        await this.smsService.sendCustomerCanceledSosSms(professional.msisdn, requestId)
+      }
     }
-
-    if (job.status === 'completed') {
-      throw new BadRequestException('Não é possível cancelar um pedido já completado.')
-    }
-
-    // Cancel job
-    await this.jobRepository.cancel(requestId)
-
-    // Create job event
-    await this.jobEventRepository.create({
-      jobId: requestId,
-      eventType: 'canceled',
-      userId,
-      metadata: { type: 'sos' },
-    })
 
     return {
       message: 'Pedido cancelado com sucesso.',

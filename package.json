@@ -29,6 +29,7 @@
     "#middleware/*": "./app/middleware/*.js",
     "#validators/*": "./app/validators/*.js",
     "#dtos/*": "./app/dtos/*.js",
+    "#types/*": "./app/types/*.js",
     "#providers/*": "./providers/*.js",
     "#policies/*": "./app/policies/*.js",
     "#abilities/*": "./app/abilities/*.js",
@@ -60,12 +61,14 @@
   },
   "dependencies": {
     "@adonisjs/auth": "^10.1.0",
-    "@adonisjs/core": "^7.3.5",
+    "@adonisjs/core": "^7.6.0",
     "@adonisjs/cors": "^3.0.0",
     "@adonisjs/limiter": "^3.0.1",
     "@adonisjs/lucid": "^22.4.2",
     "@adonisjs/redis": "^10.0.0",
+    "@adonisjs/transmit": "^3.0.2",
     "@vinejs/vine": "^4.4.0",
+    "ioredis": "^5.11.1",
     "luxon": "^3.7.1",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2"

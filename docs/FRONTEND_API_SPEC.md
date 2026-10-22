@@ -6,7 +6,7 @@ Este documento descreve a API do backend **Mechanics** para uso na construção 
 
 ## 1. Visão geral
 
-- **Stack backend:** AdonisJS 6 (Node.js), PostgreSQL com PostGIS (geolocalização).
+- **Stack backend:** AdonisJS 7 (Node.js), PostgreSQL com PostGIS (geolocalização), Redis e Transmit/SSE.
 - **Autenticação:** Bearer token (Access Token). Login retorna um token que deve ser enviado no header `Authorization: Bearer <token>` em rotas protegidas.
 - **Formato:** JSON em request e response. Content-Type: `application/json`.
 - **Base URL:** Definida no ambiente (ex.: `http://localhost:3333`). **Não há prefixo `/api`** nas rotas atuais.
@@ -415,6 +415,10 @@ Todas as rotas abaixo são **sem autenticação** no código atual (nenhum `.use
     "rating": "number",
     "ratingCount": "number",
     "distance": "string (ex: \"1.85 km\")",
+    "location": {
+      "latitude": "number",
+      "longitude": "number"
+    },
     "profession": "string",
     "status": "free | busy | pending",
     "yearsOfExperience": "number",

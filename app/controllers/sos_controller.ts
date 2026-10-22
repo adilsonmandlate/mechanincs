@@ -12,6 +12,9 @@ import { ProfessionalProfileRepository } from '#repositories/professional_profil
 import { findNearbyMechanicsValidator } from '#validators/sos/find_nearby_mechanics_validator'
 import { createSosRequestValidator } from '#validators/sos/create_sos_request_validator'
 import { rateSosRequestValidator } from '#validators/sos/rate_sos_request_validator'
+import ConfirmSosCompletionUseCase from '#usecases/sos/confirm_sos_completion_usecase'
+import ReportSosCompletionProblemUseCase from '#usecases/sos/report_sos_completion_problem_usecase'
+import { reportCompletionProblemValidator } from '#validators/sos/complete_sos_request_validator'
 
 export default class SosController {
   @inject()
@@ -67,6 +70,8 @@ export default class SosController {
     // Format depends on SMS provider (Twilio, AWS SNS, etc.)
     const msisdn = request.input('From') || request.input('from') || request.input('msisdn')
     const message = request.input('Body') || request.input('body') || request.input('message')
+    const providerMessageId =
+      request.input('MessageSid') || request.input('messageId') || request.input('message_id')
 
     if (!msisdn || !message) {
       return response.badRequest({ message: 'Msisdn e mensagem são obrigatórios.' })
@@ -75,6 +80,7 @@ export default class SosController {
     const result = await confirmSosRequestUseCase.executeBySms({
       msisdn,
       response: message,
+      providerMessageId,
     })
 
     return response.ok(result)
@@ -151,5 +157,31 @@ export default class SosController {
       data: payload,
     })
     return response.ok(result)
+  }
+
+  @inject()
+  async confirmCompletion(
+    { params, response, auth }: HttpContext,
+    useCase: ConfirmSosCompletionUseCase
+  ) {
+    const user = auth.getUserOrFail()
+    const result = await useCase.execute({ requestId: Number(params.id), userId: user.id })
+    return response.ok(result)
+  }
+
+  @inject()
+  async reportCompletionProblem(
+    { params, request, response, auth }: HttpContext,
+    useCase: ReportSosCompletionProblemUseCase
+  ) {
+    const user = auth.getUserOrFail()
+    const payload = await request.validateUsing(reportCompletionProblemValidator)
+    const result = await useCase.execute({
+      requestId: Number(params.id),
+      userId: user.id,
+      reason: payload.reason,
+      description: payload.description,
+    })
+    return response.created(result)
   }
 }

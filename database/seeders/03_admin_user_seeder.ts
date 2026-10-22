@@ -6,7 +6,7 @@ import { DateTime } from 'luxon'
 export default class extends BaseSeeder {
   async run() {
     const email = 'admin@demo.local'
-    const msisdn = '258840000000'
+    const msisdn = '840000000'
 
     let user = await User.query().where('email', email).orWhere('msisdn', msisdn).first()
 

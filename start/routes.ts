@@ -8,6 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import transmit from '@adonisjs/transmit/services/main'
 import { middleware } from './kernel.js'
 import {
   authThrottle,
@@ -20,6 +21,16 @@ import {
 const AuthController = () => import('#controllers/auth_controller')
 const ProfessionController = () => import('#controllers/profession_controller')
 const SosController = () => import('#controllers/sos_controller')
+const DemoSmsController = () => import('#controllers/demo_sms_controller')
+
+transmit.registerRoutes((route) => {
+  if (
+    route.getPattern() === '__transmit/subscribe' ||
+    route.getPattern() === '__transmit/unsubscribe'
+  ) {
+    route.middleware(middleware.auth())
+  }
+})
 
 // Health check
 router.get('/', async () => {
@@ -85,8 +96,20 @@ router
         router.post('/request/:id/reject', [SosController, 'reject'])
         router.post('/request/:id/cancel', [SosController, 'cancel'])
         router.post('/request/:id/rate', [SosController, 'rate'])
+        router.post('/request/:id/confirm-completion', [SosController, 'confirmCompletion'])
+        router.post('/request/:id/report-problem', [SosController, 'reportCompletionProblem'])
       })
       .use(middleware.auth())
       .use(sosAuthenticatedThrottle)
   })
   .prefix('/sos')
+
+router
+  .group(() => {
+    router.get('/conversations', [DemoSmsController, 'index'])
+    router.get('/conversations/:id', [DemoSmsController, 'show'])
+    router.post('/conversations/:id/messages', [DemoSmsController, 'send'])
+    router.get('/disputes', [DemoSmsController, 'disputes'])
+  })
+  .prefix('/demo/sms')
+  .use([middleware.auth(), middleware.demoSms(), sosAuthenticatedThrottle])

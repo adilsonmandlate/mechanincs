@@ -1,5 +1,6 @@
 import JobEvent from '#models/job_event'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { JobEventType } from '#types/assistance'
 
 export class JobEventRepository {
   /**
@@ -8,7 +9,7 @@ export class JobEventRepository {
   async create(
     data: {
       jobId: number
-      eventType: 'created' | 'accepted' | 'started' | 'completed' | 'canceled'
+      eventType: JobEventType
       userId: number
       metadata?: Record<string, any>
     },
